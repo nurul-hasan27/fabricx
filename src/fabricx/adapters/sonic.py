@@ -55,31 +55,106 @@ def dump_config_db(lab: str, node: str) -> dict[str, Any]:
     return data
 
 
-def trace_route(lab: str, node: str, prefix: str) -> list[Hop]:
-    """Follow one prefix: APPL_DB ROUTE_TABLE (written by fpmsyncd) -> ASIC_DB route entry and its
-    next hop (written by orchagent). Hops that are not found are returned with empty fields so the
-    gap shows exactly where the chain stops."""
-    hops: list[Hop] = []
-    akey = f"ROUTE_TABLE:{prefix}"
-    hops.append(Hop("fpmsyncd", "APPL_DB", akey, db_hgetall(lab, node, "APPL_DB", akey)))
+def _json(text: str) -> Any:
+    try:
+        return json.loads(text) if text.strip() else {}
+    except json.JSONDecodeError:
+        return {}
+
+
+def vtysh_json(lab: str, node: str, cmd: str) -> Any:
+    return _json(node_exec(lab, node, f"vtysh -c '{cmd} json'", timeout=30, retries=1).stdout)
+
+
+def _bgp_fields(d: dict[str, Any]) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for n, p in enumerate(d.get("paths", []), 1):
+        best = "best" if p.get("bestpath", {}).get("overall") else ("multipath" if p.get("multipath") else "")
+        nhs = ",".join(x.get("ip", "") for x in p.get("nexthops", []))
+        out[f"path{n}"] = f"as-path [{p.get('aspath', {}).get('string', '')}] via {nhs} {best}".strip()
+    return out
+
+
+def _zebra_fields(d: dict[str, Any], prefix: str) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for r in d.get(prefix, []):
+        out["protocol"] = str(r.get("protocol", ""))
+        for k in ("selected", "installed", "offloaded", "failed", "queued"):
+            if k in r:
+                out[k] = str(r[k])
+        for n, nh in enumerate(r.get("nexthops", []), 1):
+            out[f"nexthop{n}"] = f"{nh.get('ip', '')} dev {nh.get('interfaceName', '')} fib={nh.get('fib', False)}"
+    return out
+
+
+def appl_route_key(lab: str, node: str, prefix: str) -> str:
+    """fpmsyncd stores host routes without '/32' on some branches; try both spellings."""
+    for key in (f"ROUTE_TABLE:{prefix}", f"ROUTE_TABLE:{prefix.removesuffix('/32')}"):
+        if db_keys(lab, node, "APPL_DB", key):
+            return key
+    return f"ROUTE_TABLE:{prefix}"
+
+
+def asic_route_key(lab: str, node: str, prefix: str) -> str:
     esc = re.escape(prefix)
-    route_key = next((k for k in db_keys(lab, node, "ASIC_DB", "ASIC_STATE:SAI_OBJECT_TYPE_ROUTE_ENTRY:*")
-                      if re.search(rf'"dest":"{esc}"', k)), "")
+    return next((k for k in db_keys(lab, node, "ASIC_DB", "ASIC_STATE:SAI_OBJECT_TYPE_ROUTE_ENTRY:*")
+                 if re.search(rf'"dest":"{esc}"', k)), "")
+
+
+def trace_route(lab: str, node: str, prefix: str) -> list[Hop]:
+    """Follow one prefix through a SONiC node, in the order the software hands it on:
+    bgpd (best path) -> zebra (RIB; FPM to fpmsyncd) -> APPL_DB ROUTE_TABLE (fpmsyncd) -> ASIC_DB route
+    entry and next hop / next-hop group (orchagent) -> syncd. A hop that is not found keeps empty fields,
+    so the gap shows exactly where the chain stops."""
+    hops = [Hop("bgpd (best path)", "FRR bgpd", f"show bgp ipv4 unicast {prefix}",
+                _bgp_fields(vtysh_json(lab, node, f"show bgp ipv4 unicast {prefix}"))),
+            Hop("zebra (RIB -> FPM)", "FRR zebra", f"show ip route {prefix}",
+                _zebra_fields(vtysh_json(lab, node, f"show ip route {prefix}"), prefix))]
+    akey = appl_route_key(lab, node, prefix)
+    hops.append(Hop("fpmsyncd", "APPL_DB", akey, db_hgetall(lab, node, "APPL_DB", akey)))
+    route_key = asic_route_key(lab, node, prefix)
     route = db_hgetall(lab, node, "ASIC_DB", route_key) if route_key else {}
     hops.append(Hop("orchagent (routeorch)", "ASIC_DB", route_key or f"(no route entry for {prefix})", route))
     oid = route.get("SAI_ROUTE_ENTRY_ATTR_NEXT_HOP_ID", "")
     if oid and oid != "oid:0x0":
-        for typ in ("NEXT_HOP_GROUP", "NEXT_HOP"):
-            key = f"ASIC_STATE:SAI_OBJECT_TYPE_{typ}:{oid}"
-            fields = db_hgetall(lab, node, "ASIC_DB", key)
-            if fields:
-                hops.append(Hop("orchagent (nhg/neighorch)", "ASIC_DB", key, fields))
-                break
+        nh = db_hgetall(lab, node, "ASIC_DB", f"ASIC_STATE:SAI_OBJECT_TYPE_NEXT_HOP:{oid}")
+        if nh:
+            hops.append(Hop("orchagent (neighorch)", "ASIC_DB", f"ASIC_STATE:SAI_OBJECT_TYPE_NEXT_HOP:{oid}", nh))
+        else:
+            gkey = f"ASIC_STATE:SAI_OBJECT_TYPE_NEXT_HOP_GROUP:{oid}"
+            hops.append(Hop("orchagent (routeorch ECMP group)", "ASIC_DB", gkey,
+                            db_hgetall(lab, node, "ASIC_DB", gkey)))
+            for mkey in db_keys(lab, node, "ASIC_DB", "ASIC_STATE:SAI_OBJECT_TYPE_NEXT_HOP_GROUP_MEMBER:*"):
+                m = db_hgetall(lab, node, "ASIC_DB", mkey)
+                if m.get("SAI_NEXT_HOP_GROUP_MEMBER_ATTR_NEXT_HOP_GROUP_ID") != oid:
+                    continue
+                hops.append(Hop("orchagent (ECMP member)", "ASIC_DB", mkey, m))
+                nkey = f"ASIC_STATE:SAI_OBJECT_TYPE_NEXT_HOP:{m.get('SAI_NEXT_HOP_GROUP_MEMBER_ATTR_NEXT_HOP_ID', '')}"
+                hops.append(Hop("orchagent (neighorch)", "ASIC_DB", nkey, db_hgetall(lab, node, "ASIC_DB", nkey)))
     return hops
 
 
-def render_trace(prefix: str, hops: list[Hop]) -> str:
-    lines = [f"# Route trace for {prefix}", ""]
+def trace_interface(lab: str, node: str, port: str) -> list[Hop]:
+    """One port through the databases: CONFIG_DB (intent) -> APPL_DB (portmgrd/portsyncd) -> STATE_DB
+    (state) -> ASIC_DB port object (orchagent) -> COUNTERS_DB (syncd/flex counters)."""
+    oid = node_exec(lab, node, f"sonic-db-cli COUNTERS_DB HGET COUNTERS_PORT_NAME_MAP {port}",
+                    timeout=30).stdout.strip()
+    counters = db_hgetall(lab, node, "COUNTERS_DB", f"COUNTERS:{oid}") if oid else {}
+    keep = {k: v for k, v in counters.items() if k in (
+        "SAI_PORT_STAT_IF_IN_UCAST_PKTS", "SAI_PORT_STAT_IF_OUT_UCAST_PKTS",
+        "SAI_PORT_STAT_IF_IN_OCTETS", "SAI_PORT_STAT_IF_OUT_OCTETS", "SAI_PORT_STAT_IF_IN_DISCARDS")}
+    def get(db: str, key: str) -> dict[str, str]:
+        return db_hgetall(lab, node, db, key)
+    return [Hop("config (intent)", "CONFIG_DB", f"PORT|{port}", get("CONFIG_DB", f"PORT|{port}")),
+            Hop("portmgrd / portsyncd", "APPL_DB", f"PORT_TABLE:{port}", get("APPL_DB", f"PORT_TABLE:{port}")),
+            Hop("portsyncd (kernel state)", "STATE_DB", f"PORT_TABLE|{port}", get("STATE_DB", f"PORT_TABLE|{port}")),
+            Hop("orchagent (portsorch)", "ASIC_DB", f"ASIC_STATE:SAI_OBJECT_TYPE_PORT:{oid}",
+                db_hgetall(lab, node, "ASIC_DB", f"ASIC_STATE:SAI_OBJECT_TYPE_PORT:{oid}") if oid else {}),
+            Hop("syncd (flex counters)", "COUNTERS_DB", f"COUNTERS:{oid}", keep)]
+
+
+def render_trace(prefix: str, hops: list[Hop], title: str = "Route trace") -> str:
+    lines = [f"# {title} for {prefix}", ""]
     for i, h in enumerate(hops, 1):
         lines += [f"## {i}. {h.stage} -> {h.db}", f"`{h.key}`", ""]
         lines += [f"- {k} = {v}" for k, v in sorted(h.fields.items())] or ["- (nothing found here)"]

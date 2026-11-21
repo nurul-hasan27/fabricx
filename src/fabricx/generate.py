@@ -5,7 +5,7 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
-from .model import Fabric
+from .model import Fabric, sonic_port
 
 TEMPLATES = Path(__file__).resolve().parents[2] / "templates"
 
@@ -21,11 +21,17 @@ def render_all(f: Fabric, routing: bool = True) -> dict[str, str]:
     files[f"{f.name}.clab.yml"] = env.get_template("clab.yml.j2").render(f=f)
     for sw in f.spines + f.leaves:
         d = f"configs/{sw.name}"
+        sonic = sw.nos == "sonic-vs"
         files[f"{d}/frr.conf"] = env.get_template("frr.conf.j2").render(
             f=f, sw=sw, ifaces=f.iface_ips(sw.name),
             nbrs=f.neighbors(sw.name), routing=routing, u=f.underlay,
             is_leaf=sw in f.leaves, isis_net=f.isis_net(sw.name),
-            vlans=f.leaf_vlans(sw.name), vrfs=f.leaf_vrfs(sw.name))
+            vlans=f.leaf_vlans(sw.name), vrfs=f.leaf_vrfs(sw.name), sonic=sonic)
+        if sonic:   # SONiC: addresses go to CONFIG_DB, FRR is started and configured by sonic-setup.sh
+            files[f"{d}/sonic-setup.sh"] = env.get_template("sonic-setup.sh.j2").render(
+                f=f, sw=sw, u=f.underlay,
+                ifaces=[(sonic_port(i), a) for i, a in f.iface_ips(sw.name)])
+            continue
         files[f"{d}/daemons"] = env.get_template("daemons.j2").render(routing=routing, u=f.underlay)
         if sw in f.leaves:
             files[f"{d}/setup.sh"] = env.get_template("leaf-setup.sh.j2").render(

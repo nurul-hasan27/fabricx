@@ -3,6 +3,8 @@ frr defaults datacenter
 hostname {{ sw.name }}
 service integrated-vtysh-config
 !
+{# SONiC-VS: interface and loopback addresses live in CONFIG_DB (see sonic-setup.sh), not in FRR. #}
+{% if not sonic %}
 interface lo
  ip address {{ sw.loopback }}/32
 {% if routing and u.protocol == 'ospf' %}
@@ -38,6 +40,7 @@ interface {{ ifname }}
 {% endif %}
 !
 {% endfor %}
+{% endif %}
 {% if routing %}
 {% if u.bfd_enabled %}
 bfd

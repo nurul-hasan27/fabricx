@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import ipaddress
+import os
 from pathlib import Path
 
 import yaml
@@ -57,6 +58,18 @@ class Switch(BaseModel):
     name: str
     asn: int
     loopback: ipaddress.IPv4Address
+    nos: str = "frr"   # frr | sonic-vs
+
+
+class Sonic(BaseModel):
+    """Settings for SONiC-VS nodes (Phase 7). trace_prefix is only used by experiment E8."""
+    image: str
+    trace_prefix: ipaddress.IPv4Network | None = None
+
+
+def sonic_port(ifname: str) -> str:
+    """Container interface -> SONiC port name, from the image's lanemap.ini (eth1 -> Ethernet0, eth2 -> Ethernet4)."""
+    return f"Ethernet{4 * (int(ifname.removeprefix('eth')) - 1)}"
 
 
 class Host(BaseModel):
@@ -95,6 +108,7 @@ class Fabric(BaseModel):
     fabric_link_base: ipaddress.IPv4Network
     anycast_gw_mac: str
     underlay: Underlay = Underlay()
+    sonic: Sonic | None = None
     vrfs: list[Vrf]
     vlans: list[Vlan]
     spines: list[Switch]
@@ -125,6 +139,16 @@ class Fabric(BaseModel):
                 raise ValueError(f"{h.name}: unknown vlan {h.vlan}")
             if h.ip not in vlans[h.vlan].subnet:
                 raise ValueError(f"{h.name}: {h.ip} not in {vlans[h.vlan].subnet}")
+        for sw in self.spines + self.leaves:
+            if sw.nos not in ("frr", "sonic-vs"):
+                raise ValueError(f"{sw.name}: unknown nos {sw.nos}")
+            if sw.nos == "sonic-vs":
+                if self.sonic is None:
+                    raise ValueError(f"{sw.name}: nos sonic-vs needs a 'sonic:' section with the image")
+                if sw not in self.leaves or self.underlay.protocol != "ebgp":
+                    raise ValueError(f"{sw.name}: SONiC-VS is supported as an eBGP leaf only")
+                if any(h.leaf == sw.name for h in self.hosts):
+                    raise ValueError(f"{sw.name}: SONiC-VS leaf is underlay-only in this phase (no hosts)")
         return self
 
     # ---- derived state (never hand-listed) ----
@@ -212,5 +236,8 @@ class Fabric(BaseModel):
         return sorted(res)
 
 
-def load(path: str | Path = "inventory/fabric.yaml") -> Fabric:
+def load(path: str | Path | None = None) -> Fabric:
+    """Load the inventory. Default: $FABRICX_INVENTORY, else inventory/fabric.yaml (so the lab tests can run
+    against a variant without code changes)."""
+    path = path or os.environ.get("FABRICX_INVENTORY", "inventory/fabric.yaml")
     return Fabric.model_validate(yaml.safe_load(Path(path).read_text()))

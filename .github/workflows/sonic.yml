@@ -32,6 +32,39 @@ jobs:
           sudo docker stats --no-stream --format '{{.Name}} {{.MemUsage}}' | tee -a sonic-probe.txt
           df -h / | tee -a sonic-probe.txt
           sudo containerlab destroy -t labs/sonic-probe/probe.clab.yml --cleanup
+      - name: Python env and host image
+        if: inputs.mode == 'fabric'
+        run: |
+          python -m venv .venv && .venv/bin/pip install -q -e . pytest pytest-timeout
+          sudo docker build -q -t fabricx-host:1 images/host
+      - name: Deploy fabric with SONiC-VS as leaf3
+        if: inputs.mode == 'fabric'
+        run: |
+          mkdir -p artifacts/sonic
+          .venv/bin/fabricx deploy --inventory inventory/variants/sonic-leaf3.yaml 2>&1 | tee artifacts/sonic/deploy.txt
+      - name: Bring-up state
+        if: inputs.mode == 'fabric'
+        run: |
+          sleep 60
+          for c in "show bgp summary" "show bfd peers brief" "show ip route"; do echo "### leaf3: $c"; sudo docker exec clab-fabricx-leaf3 vtysh -c "$c"; done > artifacts/sonic/bringup.txt 2>&1
+          for c in "show bgp summary" "show bfd peers brief"; do echo "### spine1: $c"; sudo docker exec clab-fabricx-spine1 vtysh -c "$c"; done >> artifacts/sonic/bringup.txt 2>&1
+          echo "### leaf3 kernel addresses" >> artifacts/sonic/bringup.txt; sudo docker exec clab-fabricx-leaf3 ip -br addr >> artifacts/sonic/bringup.txt 2>&1
+          echo "### leaf3 ping spine loopbacks" >> artifacts/sonic/bringup.txt; sudo docker exec clab-fabricx-leaf3 sh -c 'ping -c2 -W1 10.0.0.1; ping -c2 -W1 10.0.0.11' >> artifacts/sonic/bringup.txt 2>&1 || true
+          cat artifacts/sonic/bringup.txt
+      - name: Lab test suite against the SONiC variant (recorded, not gating)
+        if: inputs.mode == 'fabric'
+        env:
+          FABRICX_INVENTORY: inventory/variants/sonic-leaf3.yaml
+        run: |
+          .venv/bin/pytest tests/lab -v --timeout=400 -m "not resilience" --junitxml=artifacts/sonic/junit.xml 2>&1 | tee artifacts/sonic/pytest.txt || true
+          .venv/bin/fabricx validate --inventory $FABRICX_INVENTORY --out artifacts/sonic/validate 2>&1 | tee artifacts/sonic/validate.txt || true
+          .venv/bin/fabricx drift --inventory $FABRICX_INVENTORY 2>&1 | tee artifacts/sonic/drift.txt || true
+      - name: E8 route trace, orchagent fault, QoS audit of the real CONFIG_DB
+        if: inputs.mode == 'fabric'
+        run: .venv/bin/python experiments/E8/run_e8.py inventory/variants/sonic-leaf3.yaml 10 2>&1 | tee artifacts/sonic/e8.log
+      - name: Tear down
+        if: always() && inputs.mode == 'fabric'
+        run: sudo containerlab destroy -t generated/fabricx.clab.yml --cleanup || true
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -39,3 +72,4 @@ jobs:
           path: |
             sonic-*.txt
             artifacts/sonic/
+            experiments/E8/results/

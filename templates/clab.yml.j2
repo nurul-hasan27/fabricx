@@ -3,6 +3,17 @@ name: {{ f.name }}
 topology:
   nodes:
 {% for sw in f.spines + f.leaves %}
+{% if sw.nos == 'sonic-vs' %}
+    {{ sw.name }}:
+      kind: sonic-vs
+      image: {{ f.sonic.image }}
+      binds:
+        - configs/{{ sw.name }}/frr.conf:/etc/fabricx/frr.conf:ro
+        - configs/{{ sw.name }}/sonic-setup.sh:/opt/sonic-setup.sh:ro
+        - ../src/fabricx/probe.py:/opt/probe.py:ro
+      exec:
+        - bash /opt/sonic-setup.sh
+{% else %}
     {{ sw.name }}:
       kind: linux
       image: {{ f.frr_image }}
@@ -20,6 +31,7 @@ topology:
 {% else %}
       exec:
         - sysctl -w net.ipv4.fib_multipath_hash_policy={{ f.ecmp_hash_policy }}
+{% endif %}
 {% endif %}
 {% endfor %}
 {% for h in f.hosts %}
