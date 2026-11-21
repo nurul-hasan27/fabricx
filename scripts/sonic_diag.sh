@@ -11,8 +11,11 @@ x $S "sonic-db-cli STATE_DB HGETALL 'PORT_TABLE|Ethernet0'; sonic-db-cli APPL_DB
 x $S "sonic-db-cli APPL_DB keys 'INTF_TABLE:*'; sonic-db-cli ASIC_DB keys 'ASIC_STATE:SAI_OBJECT_TYPE_ROUTER_INTERFACE:*' | wc -l"
 x $S "ping -c2 -W1 $PIP; ip neigh"
 x $P "ip -br link show $PIF; ip -br addr show $PIF; ip neigh"
+N=25 x $P "vtysh -c 'show bgp neighbors' | grep -A22 'BGP neighbor is ${PIP%.*}.$(( ${PIP##*.} + 1 ))' | grep -i -E 'state|reset|bfd|connect|timer|error'"
+x $P "vtysh -c 'show bfd peers brief'"
+x $S "vtysh -c 'show bfd peers brief'; cat /var/log/bfdd.log | tail -5; ss -ltn | grep -E ':179|:3784'"
 echo; echo "### capture 6 s on both ends while leaf pings"
-sudo timeout 6 nsenter -t $(sudo docker inspect -f '{{.State.Pid}}' $S) -n tcpdump -c 8 -nn -e -i eth1 2>&1 | head -12 &
-sudo timeout 6 nsenter -t $(sudo docker inspect -f '{{.State.Pid}}' $P) -n tcpdump -c 8 -nn -e -i $PIF 2>&1 | head -12 &
+sudo timeout 15 nsenter -t $(sudo docker inspect -f '{{.State.Pid}}' $S) -n tcpdump -c 12 -nn -i eth1 'tcp port 179 or udp port 3784 or icmp' 2>&1 | head -12 &
+sudo timeout 15 nsenter -t $(sudo docker inspect -f '{{.State.Pid}}' $P) -n tcpdump -c 12 -nn -i $PIF 'tcp port 179 or udp port 3784 or icmp' 2>&1 | head -12 &
 sleep 1; sudo docker exec $S ping -c3 -W1 $PIP >/dev/null 2>&1; wait
 x $S "tail -n 30 /var/log/syslog 2>/dev/null | grep -i -E 'bfdd|bgpd|syncd|vs|error' | tail -15"
