@@ -34,7 +34,8 @@ log "addresses on kernel interfaces: ok=$ok"
 # 4. FRR: zebra already runs (with the FPM module to fpmsyncd); start bgpd{{ ' and bfdd' if u.bfd_enabled }}, then apply config
 supervisorctl start bgpd >/dev/null
 {% if u.bfd_enabled %}
-pgrep -x bfdd >/dev/null || /usr/lib/frr/bfdd -A 127.0.0.1 -d
+pgrep -x bfdd >/dev/null || /usr/lib/frr/bfdd -A 127.0.0.1 -d 2>&1 || log "bfdd failed to start (rc=$?)"
+sleep 1; pgrep -x bfdd >/dev/null && log "bfdd running" || log "bfdd NOT running"
 {% endif %}
 for i in $(seq 1 30); do vtysh -c 'show bgp summary' >/dev/null 2>&1 && break; sleep 1; done
 vtysh -f /etc/fabricx/frr.conf

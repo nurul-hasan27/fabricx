@@ -46,11 +46,8 @@ jobs:
         if: inputs.mode == 'fabric'
         run: |
           sleep 60
-          for c in "show bgp summary" "show bfd peers brief" "show ip route"; do echo "### leaf3: $c"; sudo docker exec clab-fabricx-leaf3 vtysh -c "$c"; done > artifacts/sonic/bringup.txt 2>&1
-          for c in "show bgp summary" "show bfd peers brief"; do echo "### spine1: $c"; sudo docker exec clab-fabricx-spine1 vtysh -c "$c"; done >> artifacts/sonic/bringup.txt 2>&1
-          echo "### leaf3 kernel addresses" >> artifacts/sonic/bringup.txt; sudo docker exec clab-fabricx-leaf3 ip -br addr >> artifacts/sonic/bringup.txt 2>&1
-          echo "### leaf3 ping spine loopbacks" >> artifacts/sonic/bringup.txt; sudo docker exec clab-fabricx-leaf3 sh -c 'ping -c2 -W1 10.0.0.1; ping -c2 -W1 10.0.0.11' >> artifacts/sonic/bringup.txt 2>&1 || true
-          cat artifacts/sonic/bringup.txt
+          lk=$(.venv/bin/python -c "from fabricx import model; f=model.load('inventory/variants/sonic-leaf3.yaml'); l=next(x for x in f.fabric_links() if x.leaf=='leaf3' and x.spine=='spine1'); print(l.spine_ip, l.spine_if)")
+          scripts/sonic_diag.sh leaf3 spine1 $lk 2>&1 | tee artifacts/sonic/bringup.txt || true
       - name: Lab test suite against the SONiC variant (recorded, not gating)
         if: inputs.mode == 'fabric'
         env:
