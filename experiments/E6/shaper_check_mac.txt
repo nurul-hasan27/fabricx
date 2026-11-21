@@ -1,0 +1,7 @@
+kernel: 7.2.12-orbstack-00394-gbecdd6130068
+no shaper: 5.21 Gbits/sec
+htb 100mbit cburst 1600 + pfifo: 16.1 Mbits/sec
+htb 100mbit cburst 15k + pfifo: 56.3 Mbits/sec
+htb 100mbit cburst 60k + pfifo: 55.1 Mbits/sec
+tbf 100mbit + pfifo: 94.5 Mbits/sec
+tbf 100mbit + red: 92.0 Mbits/sec

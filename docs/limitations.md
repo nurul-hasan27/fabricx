@@ -12,3 +12,10 @@
 | FRR EVPN start-up | a check-and-repair after start-up handles an FRR race (duplicate BGP VRF instance) | it is a workaround around FRR timing, not a fix inside FRR |
 
 Honesty tiers used in this repo: BUILT+MEASURED, BUILT, EMULATED, STUDIED, OUT OF SCOPE (see `docs/blueprint_v2.html` section 4).
+
+## Added in Phase 8
+| Area | What the lab does | What it cannot say |
+|---|---|---|
+| Congestion (E6) | Linux TBF + pfifo/RED on a veth port, 100 Mbit/s, TCP cubic/DCTCP | switch shared-buffer behaviour, PFC, DCQCN in NICs, line-rate numbers |
+| Telemetry | polled every 5 s scrape (one docker exec per switch) | sub-second events (a millisecond failover is invisible in the graphs) |
+| Mac VM shaping | HTB cannot hold its rate in the VM; TBF used | whether HTB would be fine on bare metal (not tested) |

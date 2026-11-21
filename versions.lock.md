@@ -31,3 +31,10 @@
 | FRR inside SONiC | 10.3 (sonic) |
 | x86 runner | GitHub Actions `ubuntu-latest` (kernel 7.0.0-1020-azure in the logs), Python 3.12 / 3.14 venv |
 | pytest-timeout | used in CI only |
+
+## Added in Phase 8
+| Item | Value |
+|---|---|
+| Prometheus | prom/prometheus:v3.1.0 (404 MB on disk in the VM) |
+| Grafana | grafana/grafana:11.4.0 (629 MB on disk in the VM) |
+| E6 x86 runner | kernel 7.0.0-1016-aws, 4 vCPU, tcp_dctcp loadable (`experiments/E6/results_ci/runner.txt`) |

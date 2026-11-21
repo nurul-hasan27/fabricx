@@ -1,0 +1,20 @@
+{
+ "rate": "100mbit",
+ "pfifo_limit_pkts": 1000,
+ "red": "red limit 400000 min 30000 max 31500 avpkt 1500 burst 21 bandwidth 100mbit probability 1.0 ecn",
+ "run_s": 20,
+ "senders": [
+  "h1",
+  "h2",
+  "h6",
+  "h4"
+ ],
+ "receiver": "h3",
+ "bottleneck": "leaf2:eth3",
+ "available_cc": [
+  "reno",
+  "cubic",
+  "dctcp"
+ ],
+ "kernel": "7.0.0-1016-aws"
+}

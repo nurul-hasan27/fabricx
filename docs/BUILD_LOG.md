@@ -110,3 +110,11 @@ Phase 3 said spines need `neighbor FABRIC nexthop-unchanged` for EVPN. That was 
 - FRR start-up race not eliminated by ordering (2 failures in 16 CI lab runs). Reproduced on purpose (L3VNI before BGP VRF instance -> duplicate instance, no Type-5). Added a check-and-repair after leaf start-up, verified on the reproduced failure. Same commit afterwards: 7 of 7 runs passed; the repair fired in 3 of 20 FRR leaf start-ups and fixed each.
 - Local Mac after all changes: make test 116 passed + validate PASS + no drift + 25 requirements traced; make resilience 14/14.
 - Not done: EVPN overlay on the SONiC leaf, gNMI (no service in this image), SONiC-VM. Azure not used.
+
+## Phase 8 - telemetry and the congestion study
+- Exporter (`fabricx exporter`, stdlib only, one docker exec per switch per scrape), Prometheus v3.1.0 + Grafana 11.4.0 (`scripts/monitoring.sh`), one provisioned dashboard, Grafana annotations from the fault runner.
+- Acceptance demo (F01 under 200 Mbit/s iperf3): both annotations; leaf1 eth1 -> 0 and eth2 carrying all traffic during the fault; dashboard shows the BGP change 4.6 s after inject / 4.4 s after restore; no visible dip in iperf3's 1 s throughput (failover is ms, as in E1).
+- Mistakes found: silent annotation failure on a cold Grafana; exporter polled on its own timer -> impossible rates (now collect-on-scrape); E6 throughput summed over different windows (now common span); ping not ECN-capable under RED (now -Q 2 + TCP RTT); tc parser missed marks (now in parsers.py with a test).
+- E6 on GitHub x86 (N=5, run 44932925203): tail-drop median queue RTT 111 ms; RED+ECN cubic 2.06 ms but 1-3 of 12 connections fell back to non-ECN per run and 3 of 5 runs had ~1600 drops; DCTCP 2.67 ms, 0 drops, Jain 1.000. Mac cross-check for A/B agrees; HTB unusable in the Mac VM (TBF used).
+- Containers can only use congestion-control algorithms on the host's allowed list (DCTCP needed `net.ipv4.tcp_allowed_congestion_control`).
+- RoCE hardware test plan written (STUDIED). gNMI from SONiC not possible with the pinned image.

@@ -1,0 +1,27 @@
+- id: REQ-TELEM-001
+  title: Fabric exporter for Prometheus
+  requirement: One docker exec per switch per scrape collects BGP, BFD, EVPN route counts and data-port byte/drop counters, served in Prometheus text format; management and bridge interfaces are excluded.
+  steps: ["parse captured leaf1 outputs", "render the text format"]
+  pass: BGP/BFD peers up with peer names; EVPN counts by type; only eth1+ ports; HELP/TYPE once per metric
+  tests:
+    - tests/unit/test_exporter.py::test_one_exec_per_switch_with_all_sections
+    - tests/unit/test_exporter.py::test_parse_leaf_output
+    - tests/unit/test_exporter.py::test_text_format
+  evidence: [experiments/telemetry/results/demo.json]
+- id: REQ-TELEM-002
+  title: Fault injection is annotated on the dashboard
+  requirement: Every fault inject/restore posts a Grafana annotation; a failed post is reported, never silent; without Grafana it is a no-op.
+  steps: ["post without FABRICX_GRAFANA_URL", "post to a closed port", "run the F01 demo"]
+  pass: no-op returns False; failure prints a warning; demo shows both annotations
+  tests:
+    - tests/unit/test_exporter.py::test_annotation_is_a_noop_without_grafana
+    - tests/unit/test_exporter.py::test_annotation_failure_is_reported_not_silent
+  evidence: [experiments/telemetry/results/summary.md, experiments/telemetry/results/timeline.svg]
+- id: REQ-E6-001
+  title: Queue counters come from the child queue under the shaper
+  requirement: E6 drop and ECN-mark counts are read from the tail-drop/RED queue, never from the TBF shaper above it.
+  steps: ["parse captured tc -s output for tbf+red and tbf+pfifo"]
+  pass: child counters returned (e.g. 5 pfifo drops, not the shaper's 7)
+  tests:
+    - tests/unit/test_parsers_validators.py::test_tc_child_queue_counters_not_the_shapers
+  evidence: [experiments/E6/analysis.md]

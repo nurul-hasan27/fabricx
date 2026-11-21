@@ -1,0 +1,2 @@
+report: artifacts/e6-validate/2026-11-21T18-00-10Z/report.md
+PASS

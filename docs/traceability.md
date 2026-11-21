@@ -23,6 +23,9 @@
 | REQ-SONIC-002 | SONiC route trace logic | 3 | pass (3/3) | experiments/E8/results/trace_route_loopback.md, experiments/E8/results/trace_orchagent_frozen.md |
 | REQ-SONIC-003 | SONiC-VS leaf variant is generated from the inventory | 4 | pass (4/4) | inventory/variants/sonic-leaf3.yaml, artifacts/phase7/pytest.txt, artifacts/phase7/validate.txt |
 | REQ-SONIC-004 | SONiC image lines are not reported as drift | 1 | pass (1/1) | artifacts/phase7/drift.txt |
+| REQ-TELEM-001 | Fabric exporter for Prometheus | 3 | pass (3/3) | experiments/telemetry/results/demo.json |
+| REQ-TELEM-002 | Fault injection is annotated on the dashboard | 2 | pass (2/2) | experiments/telemetry/results/summary.md, experiments/telemetry/results/timeline.svg |
+| REQ-E6-001 | Queue counters come from the child queue under the shaper | 1 | pass (1/1) | experiments/E6/analysis.md |
 | REQ-UNDERLAY-001 | eBGP sessions | 2 | pass (2/2) | artifacts/validate/ |
 | REQ-UNDERLAY-002 | ECMP | 4 | pass (4/4) | artifacts/validate/ |
 | REQ-UNDERLAY-003 | BFD | 6 | pass (6/6) | experiments/E1/results.md |

@@ -1,0 +1,10 @@
+7.0.0-1016-aws
+tcp_dctcp loaded
+sch_tbf ok
+sch_red ok
+net.ipv4.tcp_allowed_congestion_control = reno cubic dctcp
+net.ipv4.tcp_available_congestion_control = reno cubic dctcp
+4
+               total        used        free      shared  buff/cache   available
+Mem:           15700         885       14238          44         895       14815
+Swap:              0           0           0

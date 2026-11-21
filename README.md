@@ -2,7 +2,7 @@
 
 A small, reproducible **EVPN-VXLAN leaf-spine lab** with a **validation engine** around it: it generates the fabric from one inventory file, checks that it works, breaks it in controlled ways, measures what happens and writes up the root cause.
 
-> Status: Phases 0-7 of `docs/PROJECT_PLAN.md`. The FRR fabric runs on a Mac M1 (OrbStack Linux VM, FRR 10.2.1, Containerlab 0.83.0) and in GitHub Actions on x86. The SONiC track (Phase 7) runs only on x86 CI, with the official SONiC-VS image (202505, build 1238524). Telemetry and the congestion study (Phase 8) are not built yet.
+> Status: Phases 0-8 of `docs/PROJECT_PLAN.md`. The FRR fabric runs on a Mac M1 (OrbStack Linux VM, FRR 10.2.1, Containerlab 0.83.0) and in GitHub Actions on x86. The SONiC track (Phase 7) runs only on x86 CI, with the official SONiC-VS image (202505, build 1238524). Telemetry (Prometheus/Grafana) and the E6 congestion study were added in Phase 8; E6's DCTCP scenario runs on x86 CI.
 
 ## Quick start
 ```bash
@@ -20,7 +20,9 @@ Needs: OrbStack with a Linux VM named `fabricx-lab` that has Docker and Containe
 | Config generation (Jinja2) | `templates/`, `fabricx generate` -> `generated/` |
 | Collectors / parsers / validators / reports | `src/fabricx/{collectors,parsers,validators,report}.py`, `fabricx validate` |
 | Loss-window probe | `src/fabricx/probe.py` |
-| Experiments with raw data | `experiments/E1`, `E2`, `E3`, `E4`, `E5`, `E7`, `E8`, `E9` |
+| Experiments with raw data | `experiments/E1`-`E9`, `experiments/telemetry` |
+| Telemetry: exporter, Prometheus + Grafana, fault annotations | `src/fabricx/exporter.py`, `monitoring/`, `scripts/monitoring.sh` |
+| RoCE hardware test plan | `docs/roce-test-plan.md` |
 | Root-cause reports | `docs/rca/RCA-001` (MTU), `RCA-002` (ECMP), `RCA-003` (route-target) |
 | Fault catalogue, diagnose, drill | `docs/fault-catalogue.md`, `src/fabricx/diagnose.py`, `experiments/E9/` |
 | Packet captures explained | `docs/packet-walkthrough.md` |
@@ -35,7 +37,7 @@ Needs: OrbStack with a Linux VM named `fabricx-lab` that has Docker and Containe
 | eBGP underlay, ECMP, BFD | BUILT + MEASURED (E1) |
 | VXLAN-EVPN, symmetric IRB, anycast gateway, 2 VRFs | BUILT (pcap + route evidence) |
 | Inventory -> config generation | BUILT |
-| Validation engine, 116 automated tests (73 unit + 43 lab), drift detection, YAML specs + traceability matrix (25 requirements) | BUILT |
+| Validation engine, 122 automated tests (79 unit + 43 lab), drift detection, YAML specs + traceability matrix (28 requirements) | BUILT |
 | Fault catalogue (14 faults), evidence bundles, layered `diagnose`, blind drill | BUILT + MEASURED (12/14 first pass, 14/14 after tuning) |
 | ECMP, EVPN-misconfig, MAC-mobility and underlay-protocol experiments (E2, E4, E7, E5) | BUILT + MEASURED |
 | Link-failure and MTU experiments | BUILT + MEASURED |
@@ -44,7 +46,9 @@ Needs: OrbStack with a Linux VM named `fabricx-lab` that has Docker and Containe
 | E8: one route through bgpd -> zebra -> APPL_DB -> orchagent -> ASIC_DB, orchagent fault, timings | BUILT + MEASURED (vslib, not a real ASIC) |
 | Lossless-QoS auditor (PFC/ECN/DSCP/buffers/watchdog), checked against a real SONiC CONFIG_DB | BUILT (static analysis) |
 | EVPN overlay on the SONiC leaf, gNMI from SONiC (image has no gNMI service), SONiC-VM | NOT DONE |
-| Telemetry, ECN/DCTCP congestion study, RoCE test plan | NOT YET (Phase 8) |
+| FRR exporter -> Prometheus -> Grafana with fault annotations | BUILT + MEASURED (F01 demo) |
+| E6 incast: tail-drop vs RED+ECN vs DCTCP | EMULATED + MEASURED (x86 CI, N=5) |
+| RoCE on real hardware | STUDIED (test plan) |
 | ASIC behaviour, line rate, optics, PFC/RDMA, scale | OUT OF SCOPE (see `docs/limitations.md`) |
 
 ## Evidence index (every number below comes from a file)
@@ -63,3 +67,6 @@ Needs: OrbStack with a Linux VM named `fabricx-lab` that has Docker and Containe
 | Frozen orchagent: route stays in `_ROUTE_TABLE` / `ROUTE_TABLE_KEY_SET`, zebra still says `offloaded=True` | `experiments/E8/results/trace_orchagent_frozen.md` |
 | SONiC accepts PFC without buffers/ECN/watchdog silently (PFC bitmask 24); the auditor reports 10 findings | `experiments/E8/results/qos_2_pfc_only_*` |
 | FRR EVPN start-up race (duplicate BGP VRF instance, no Type-5) reproduced on purpose; check-and-repair verified | `docs/phases/phase-7-sonic-track.md` |
+| Link failure on the dashboard: annotations, BGP change within one scrape, uplink shift; no visible 1 s throughput dip | `experiments/telemetry/results/` |
+| Incast queue delay: tail-drop 111 ms, RED+ECN 2.06 ms, DCTCP 2.67 ms (median, N=5); DCTCP 0 drops, Jain 1.000 | `experiments/E6/analysis.md`, `experiments/E6/results_ci/` |
+| Classic ECN: 1-3 of 12 connections per run fell back to non-ECN after a dropped SYN | `experiments/E6/results_ci/B.json` |

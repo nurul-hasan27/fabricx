@@ -1,0 +1,285 @@
+{
+ "name": "tail-drop, cubic",
+ "runs": [
+  {
+   "scenario": "A",
+   "throughput_mbps": {
+    "h1": 27.26,
+    "h2": 27.1,
+    "h6": 17.98,
+    "h4": 21.83
+   },
+   "total_mbps": 94.15,
+   "span_s": 20.13,
+   "start_skew_s": 0,
+   "jain": 0.973,
+   "per_sender_raw": {
+    "h1": {
+     "start": 1795283920,
+     "seconds": 20.120647,
+     "bytes": 68550656
+    },
+    "h2": {
+     "start": 1795283920,
+     "seconds": 20.119378,
+     "bytes": 68157440
+    },
+    "h6": {
+     "start": 1795283920,
+     "seconds": 20.125562,
+     "bytes": 45219840
+    },
+    "h4": {
+     "start": 1795283920,
+     "seconds": 20.123905,
+     "bytes": 54919168
+    }
+   },
+   "retransmits": 119,
+   "queue": {
+    "sent_pkts": 165350,
+    "dropped": 67
+   },
+   "rtt_idle_ms_median": 0.254,
+   "rtt_loaded_ms": {
+    "n": 280,
+    "median": 113.0,
+    "p95": 123.0,
+    "p99": 129.0,
+    "max": 130.0
+   },
+   "ping_loss_pct": 0.0,
+   "tcp_mean_rtt_ms": 110.92,
+   "handshakes": {
+    "connections": 12,
+    "ecn": 0,
+    "no_ecn": 12,
+    "plain_syn_seen": 12
+   }
+  },
+  {
+   "scenario": "A",
+   "throughput_mbps": {
+    "h1": 32.96,
+    "h2": 18.14,
+    "h6": 21.58,
+    "h4": 20.28
+   },
+   "total_mbps": 92.95,
+   "span_s": 20.11,
+   "start_skew_s": 0,
+   "jain": 0.942,
+   "per_sender_raw": {
+    "h1": {
+     "start": 1795283945,
+     "seconds": 20.104982,
+     "bytes": 82837504
+    },
+    "h2": {
+     "start": 1795283945,
+     "seconds": 20.112158,
+     "bytes": 45613056
+    },
+    "h6": {
+     "start": 1795283945,
+     "seconds": 20.114564,
+     "bytes": 54263808
+    },
+    "h4": {
+     "start": 1795283945,
+     "seconds": 20.113977,
+     "bytes": 50987008
+    }
+   },
+   "retransmits": 147,
+   "queue": {
+    "sent_pkts": 163238,
+    "dropped": 59
+   },
+   "rtt_idle_ms_median": 0.277,
+   "rtt_loaded_ms": {
+    "n": 280,
+    "median": 105.0,
+    "p95": 120.0,
+    "p99": 124.0,
+    "max": 131.0
+   },
+   "ping_loss_pct": 0.0,
+   "tcp_mean_rtt_ms": 98.51,
+   "handshakes": {
+    "connections": 12,
+    "ecn": 0,
+    "no_ecn": 12,
+    "plain_syn_seen": 12
+   }
+  },
+  {
+   "scenario": "A",
+   "throughput_mbps": {
+    "h1": 14.95,
+    "h2": 30.95,
+    "h6": 22.25,
+    "h4": 26.21
+   },
+   "total_mbps": 94.37,
+   "span_s": 20.12,
+   "start_skew_s": 0,
+   "jain": 0.942,
+   "per_sender_raw": {
+    "h1": {
+     "start": 1795283969,
+     "seconds": 20.123339,
+     "bytes": 37617664
+    },
+    "h2": {
+     "start": 1795283969,
+     "seconds": 20.123583,
+     "bytes": 77856768
+    },
+    "h6": {
+     "start": 1795283969,
+     "seconds": 20.121873,
+     "bytes": 55967744
+    },
+    "h4": {
+     "start": 1795283969,
+     "seconds": 20.121381,
+     "bytes": 65929216
+    }
+   },
+   "retransmits": 144,
+   "queue": {
+    "sent_pkts": 165837,
+    "dropped": 90
+   },
+   "rtt_idle_ms_median": 0.204,
+   "rtt_loaded_ms": {
+    "n": 278,
+    "median": 110.0,
+    "p95": 123.0,
+    "p99": 136.0,
+    "max": 176.0
+   },
+   "ping_loss_pct": 0.7,
+   "tcp_mean_rtt_ms": 110.25,
+   "handshakes": {
+    "connections": 12,
+    "ecn": 0,
+    "no_ecn": 12,
+    "plain_syn_seen": 12
+   }
+  },
+  {
+   "scenario": "A",
+   "throughput_mbps": {
+    "h1": 14.23,
+    "h2": 14.49,
+    "h6": 47.85,
+    "h4": 17.52
+   },
+   "total_mbps": 94.08,
+   "span_s": 20.12,
+   "start_skew_s": 0,
+   "jain": 0.736,
+   "per_sender_raw": {
+    "h1": {
+     "start": 1795283993,
+     "seconds": 20.116892,
+     "bytes": 35782656
+    },
+    "h2": {
+     "start": 1795283993,
+     "seconds": 20.114153,
+     "bytes": 36438016
+    },
+    "h6": {
+     "start": 1795283993,
+     "seconds": 20.115904,
+     "bytes": 120324096
+    },
+    "h4": {
+     "start": 1795283993,
+     "seconds": 20.1117,
+     "bytes": 44040192
+    }
+   },
+   "retransmits": 2311,
+   "queue": {
+    "sent_pkts": 166053,
+    "dropped": 1197
+   },
+   "rtt_idle_ms_median": 0.207,
+   "rtt_loaded_ms": {
+    "n": 279,
+    "median": 106.0,
+    "p95": 122.0,
+    "p99": 128.0,
+    "max": 129.0
+   },
+   "ping_loss_pct": 0.4,
+   "tcp_mean_rtt_ms": 107.06,
+   "handshakes": {
+    "connections": 12,
+    "ecn": 0,
+    "no_ecn": 12,
+    "plain_syn_seen": 12
+   }
+  },
+  {
+   "scenario": "A",
+   "throughput_mbps": {
+    "h1": 22.52,
+    "h2": 16.17,
+    "h6": 16.22,
+    "h4": 37.35
+   },
+   "total_mbps": 92.24,
+   "span_s": 20.11,
+   "start_skew_s": 0,
+   "jain": 0.877,
+   "per_sender_raw": {
+    "h1": {
+     "start": 1795284017,
+     "seconds": 20.110393,
+     "bytes": 56623104
+    },
+    "h2": {
+     "start": 1795284017,
+     "seconds": 20.1074,
+     "bytes": 40632320
+    },
+    "h6": {
+     "start": 1795284017,
+     "seconds": 20.108483,
+     "bytes": 40763392
+    },
+    "h4": {
+     "start": 1795284017,
+     "seconds": 20.103609,
+     "bytes": 93847552
+    }
+   },
+   "retransmits": 962,
+   "queue": {
+    "sent_pkts": 162701,
+    "dropped": 74
+   },
+   "rtt_idle_ms_median": 0.26,
+   "rtt_loaded_ms": {
+    "n": 280,
+    "median": 112.0,
+    "p95": 123.0,
+    "p99": 127.0,
+    "max": 130.0
+   },
+   "ping_loss_pct": 0.0,
+   "tcp_mean_rtt_ms": 113.97,
+   "handshakes": {
+    "connections": 12,
+    "ecn": 0,
+    "no_ecn": 12,
+    "plain_syn_seen": 12
+   }
+  }
+ ]
+}
