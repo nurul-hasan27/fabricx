@@ -20,7 +20,9 @@ jobs:
       - name: Kernel support (recorded)
         run: |
           mkdir -p experiments/E6/results
+          # containers (non-initial network namespaces) may only pick algorithms on the host's ALLOWED list
           { uname -r; sudo modprobe tcp_dctcp && echo "tcp_dctcp loaded"; for m in sch_tbf sch_red; do sudo modprobe $m && echo "$m ok"; done
+            sudo sysctl -w net.ipv4.tcp_allowed_congestion_control="reno cubic dctcp"
             sysctl net.ipv4.tcp_available_congestion_control; nproc; free -m; } 2>&1 | tee experiments/E6/results/runner.txt
       - name: Install Containerlab 0.83.0, venv, host image
         run: |

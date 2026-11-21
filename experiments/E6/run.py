@@ -9,7 +9,8 @@ a 100 Mbit/s class, TBF 91-95 Mbit/s - see analysis.md.) Under the shaper, the q
 Per run (RUN_S seconds, 2 TCP streams per sender): receiver-side throughput per sender, Jain fairness,
 retransmits, queue drops and ECN marks from `tc -s`, and RTT through the queue two ways: ping h1 -> h3 every
 50 ms sent as ECN-capable (ToS ECT(0), `-Q 2`: a plain ping is not ECN-capable, so RED dropped 36% of the probes
-in the first trial and the survivors understated the delay) and TCP's own smoothed RTT (iperf3 mean_rtt). Usage: python experiments/E6/run.py [scenarios] [runs]   e.g.  A,B 5
+in the first trial and the survivors understated the delay) and TCP's own smoothed RTT (iperf3 mean_rtt). The receiver also captures every SYN / SYN-ACK in the first seconds, to see which
+connections negotiated ECN. Usage: python experiments/E6/run.py [scenarios] [runs]   e.g.  A,B 5
 """
 from __future__ import annotations
 
@@ -52,13 +53,33 @@ def setup(qdisc: str, cc: str, ecn: int) -> None:
     ex(LEAF, f"tc qdisc add dev {PORT} root handle 1: tbf rate {RATE} burst 60k limit 1000000")
     ex(LEAF, f"tc qdisc add dev {PORT} parent 1:1 handle 10: {qdisc}")
     for h in SENDERS + [RECV]:
-        ex(h, f"sysctl -qw net.ipv4.tcp_ecn={ecn} net.ipv4.tcp_congestion_control={cc}")
+        ex(h, f"sysctl -w net.ipv4.tcp_ecn={ecn} net.ipv4.tcp_congestion_control={cc}")
         got = ex(h, "sysctl -n net.ipv4.tcp_congestion_control").strip()
         assert got == cc, f"{h}: congestion control is {got}, wanted {cc}"
 
 
 def qstats() -> dict[str, int]:
     return parsers.tc_child_qdisc_stats(ex(LEAF, f"tc -s qdisc show dev {PORT}"))
+
+
+def parse_handshakes(txt: str, recv_ip: str) -> dict[str, int]:
+    """Count TCP handshakes seen at the receiver (tcpdump -nn lines). Per connection (sender ip:port):
+    SYN offered ECN = 'Flags [SEW]', plain SYN (e.g. a retry without ECN) = 'Flags [S]',
+    receiver accepted ECN = SYN-ACK 'Flags [S.E]'."""
+    syn_ecn, syn_plain, synack_ecn, synack_plain = set(), set(), set(), set()
+    for line in txt.splitlines():
+        m = re.search(r"IP (\S+) > (\S+): Flags \[([^\]]+)\]", line)
+        if not m:
+            continue
+        src, dst, flags = m.group(1), m.group(2).rstrip(":"), m.group(3)
+        if src.startswith(recv_ip + ".") and flags.startswith("S."):
+            (synack_ecn if "E" in flags else synack_plain).add(dst)
+        elif dst.startswith(recv_ip + ".") and flags.startswith("S") and "." not in flags:
+            (syn_ecn if "E" in flags else syn_plain).add(src)
+    # The capture is on the receiver, i.e. AFTER the bottleneck queue: a SYN that RED dropped is never seen, only
+    # its retry. Linux retries an ECN SYN without ECN (RFC 3168), so 'no_ecn' counts connections that fell back.
+    return {"connections": len(synack_ecn | synack_plain), "ecn": len(synack_ecn),
+            "no_ecn": len(synack_plain - synack_ecn), "plain_syn_seen": len(syn_plain - syn_ecn)}
 
 
 def ping_rtts(text: str) -> list[float]:
@@ -77,6 +98,10 @@ def one_run(scen: str) -> dict:
     servers = " ; ".join(f"iperf3 -s -D -p {5201 + i}" for i in range(len(SENDERS)))
     ex(RECV, f"sh -c 'pkill iperf3; sleep 0.3; {servers}'")
     time.sleep(0.5)
+    cap = subprocess.Popen(shlex.split(PREFIX) + shlex.split(
+        f"docker exec clab-{LAB}-{RECV} timeout 8 tcpdump -nn -l -i eth1 'tcp[tcpflags] & tcp-syn != 0'"),
+        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+    time.sleep(1)
     procs = {s: subprocess.Popen(shlex.split(PREFIX) + shlex.split(
         f"docker exec clab-{LAB}-{s} iperf3 -c {H[RECV].ip} -p {5201 + i} -t {RUN_S} -P 2 -J"),
         stdout=subprocess.PIPE, text=True) for i, s in enumerate(SENDERS)}
@@ -84,6 +109,7 @@ def one_run(scen: str) -> dict:
     loaded = ping_rtts(ex("h1", f"ping -Q 2 -c {(RUN_S - 6) * 20} -i 0.05 {H[RECV].ip}", timeout=RUN_S + 30))
     res = {s: json.loads(p.communicate(timeout=RUN_S + 60)[0]) for s, p in procs.items()}
     q = qstats()
+    ecn = parse_handshakes(cap.communicate(timeout=30)[0], str(H[RECV].ip))
     # Per sender: bytes the receiver got, and when that sender's test started / how long it ran.
     raw = {s: {"start": r["start"]["timestamp"]["timesecs"], "seconds": r["end"]["sum_received"]["seconds"],
                "bytes": r["end"]["sum_received"]["bytes"]} for s, r in res.items()}
@@ -105,7 +131,8 @@ def one_run(scen: str) -> dict:
                               "p95": round(pct(loaded, 95), 2), "p99": round(pct(loaded, 99), 2),
                               "max": round(max(loaded), 2)} if loaded else {"n": 0},
             "ping_loss_pct": round(100 * (1 - len(loaded) / ((RUN_S - 6) * 20)), 1),
-            "tcp_mean_rtt_ms": round(statistics.mean(tcp_rtt), 2) if tcp_rtt else None}
+            "tcp_mean_rtt_ms": round(statistics.mean(tcp_rtt), 2) if tcp_rtt else None,
+            "handshakes": ecn}
 
 
 def main() -> None:
@@ -129,7 +156,7 @@ def main() -> None:
             print(f"{s} run {i + 1}: total {r['total_mbps']} Mbit/s (span {r['span_s']} s, start skew {r['start_skew_s']} s), jain {r['jain']}, drops {r['queue']['dropped']}, "
                   f"marks {r['queue'].get('marked', '-')}, rtt med/p99 {r['rtt_loaded_ms'].get('median')}/"
                   f"{r['rtt_loaded_ms'].get('p99')} ms (idle {r['rtt_idle_ms_median']}), ping loss {r['ping_loss_pct']}%, "
-                  f"tcp rtt {r['tcp_mean_rtt_ms']} ms, retrans {r['retransmits']}")
+                  f"tcp rtt {r['tcp_mean_rtt_ms']} ms, retrans {r['retransmits']}, handshakes {r['handshakes']}")
         (OUT / f"{s}.json").write_text(json.dumps({"name": SCEN[s][0], "runs": rows}, indent=1))
     ex(LEAF, f"tc qdisc del dev {PORT} root")
     for h in SENDERS + [RECV]:
