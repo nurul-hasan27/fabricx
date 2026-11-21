@@ -77,8 +77,11 @@ def check_mtu(f: Fabric, state: dict) -> list[Finding]:
             i = state[node]["interfaces"].get(ifname)
             if not i or i["state"] != "UP":
                 out.append(Finding("link-down", node, f"{ifname} is {i and i['state']}"))
-            elif i["mtu"] != f.fabric_mtu:
-                out.append(Finding("underlay-mtu", node, f"{ifname} mtu {i['mtu']}, expected {f.fabric_mtu}"))
+                continue
+            rif = f.routed_if(node, ifname)
+            r = state[node]["interfaces"].get(rif)
+            if r and r["mtu"] != f.fabric_mtu:
+                out.append(Finding("underlay-mtu", node, f"{rif} mtu {r['mtu']}, expected {f.fabric_mtu}"))
     return out
 
 

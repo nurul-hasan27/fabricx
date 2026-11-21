@@ -194,6 +194,12 @@ class Fabric(BaseModel):
     def switch(self, name: str) -> Switch:
         return next(s for s in self.spines + self.leaves if s.name == name)
 
+    def routed_if(self, node: str, ifname: str) -> str:
+        """Interface that carries IP for a fabric link. FRR nodes: the container interface itself.
+        SONiC-VS: the SONiC port (Ethernet0...); the container's eth1 is only the wire underneath, and
+        SONiC sizes it 22 bytes larger than the port MTU (seen on CI: eth1 9122 for Ethernet0 9100)."""
+        return sonic_port(ifname) if self.switch(node).nos == "sonic-vs" else ifname
+
     def link_peers(self, name: str) -> list[LinkPeer]:
         res = []
         for lk in self.fabric_links():

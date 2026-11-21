@@ -54,4 +54,9 @@ def test_ports_disagreeing_on_lossless_priorities():
 
 def test_render_mentions_count():
     assert "findings" in q.render(q.audit(mutated(lambda d: d["PFC_WD"].clear())))
-    assert q.render([]) == "QoS audit: no findings"
+    assert q.render([]).startswith("QoS audit: no findings")
+
+
+def test_no_pfc_anywhere_is_reported_as_nothing_to_audit():
+    db = mutated(lambda d: d["PORT_QOS_MAP"].update({"Ethernet0,Ethernet4": {"dscp_to_tc_map": "AZURE"}}))
+    assert [(x.check, x.severity) for x in q.audit(db)] == [("QOS-000", "info")]

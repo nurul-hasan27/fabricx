@@ -223,7 +223,8 @@ def rule_l1(f: Fabric, st: dict) -> list[DFinding]:
 def rule_mtu(f: Fabric, st: dict) -> list[DFinding]:
     out = []
     for lk in f.fabric_links():
-        for node, ifn in ((lk.leaf, lk.leaf_if), (lk.spine, lk.spine_if)):
+        for node, wire in ((lk.leaf, lk.leaf_if), (lk.spine, lk.spine_if)):
+            ifn = f.routed_if(node, wire)
             i = st["nodes"][node].get("interfaces", {}).get(ifn)
             if i and i["mtu"] != f.fabric_mtu:
                 out.append(DFinding("Underlay MTU", "underlay-mtu", [node],

@@ -20,7 +20,7 @@ ECN_ON = {"ecn_green", "ecn_yellow", "ecn_red", "ecn_green_yellow", "ecn_green_r
 @dataclass(frozen=True)
 class Finding:
     check: str
-    severity: str   # error | warn
+    severity: str   # error | warn | info
     where: str
     message: str
 
@@ -104,6 +104,9 @@ def audit(db: Db) -> list[Finding]:
                                  f"lossy traffic class {t} shares a queue or priority group with a lossless class"))
         for port in ports:
             f.extend(_port_checks(db, port, prios, pfc_q))
+    if not pfc_sets:
+        f.append(Finding("QOS-000", "info", "PORT_QOS_MAP",
+                         "no port has pfc_enable: no lossless class is configured, so there is nothing to audit"))
     if len({v for v in pfc_sets.values()}) > 1:
         f.append(Finding("QOS-009", "error", "PORT_QOS_MAP",
                          "ports disagree on which priorities are lossless: "
@@ -148,6 +151,6 @@ def _port_checks(db: Db, port: str, prios: list[int], pfc_q: dict[int, int]) -> 
 
 def render(findings: list[Finding]) -> str:
     if not findings:
-        return "QoS audit: no findings"
+        return "QoS audit: no findings (lossless configuration is consistent)"
     lines = [f"{x.severity.upper():5} {x.check} {x.where}: {x.message}" for x in findings]
     return "\n".join(lines) + f"\n{len(findings)} findings"

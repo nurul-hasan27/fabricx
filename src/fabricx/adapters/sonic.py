@@ -87,6 +87,12 @@ def _zebra_fields(d: dict[str, Any], prefix: str) -> dict[str, str]:
     return out
 
 
+def staged_route_keys(lab: str, node: str) -> list[str]:
+    """Route keys fpmsyncd has produced that orchagent has not consumed yet."""
+    r = node_exec(lab, node, "sonic-db-cli APPL_DB SMEMBERS ROUTE_TABLE_KEY_SET", timeout=30)
+    return parse_keys(r.stdout)
+
+
 def appl_route_key(lab: str, node: str, prefix: str) -> str:
     """fpmsyncd stores host routes without '/32' on some branches; try both spellings."""
     for key in (f"ROUTE_TABLE:{prefix}", f"ROUTE_TABLE:{prefix.removesuffix('/32')}"):
@@ -111,7 +117,14 @@ def trace_route(lab: str, node: str, prefix: str) -> list[Hop]:
             Hop("zebra (RIB -> FPM)", "FRR zebra", f"show ip route {prefix}",
                 _zebra_fields(vtysh_json(lab, node, f"show ip route {prefix}"), prefix))]
     akey = appl_route_key(lab, node, prefix)
-    hops.append(Hop("fpmsyncd", "APPL_DB", akey, db_hgetall(lab, node, "APPL_DB", akey)))
+    appl = db_hgetall(lab, node, "APPL_DB", akey)
+    if not appl:   # ProducerStateTable: fpmsyncd writes '_ROUTE_TABLE:<key>'; orchagent moves it into ROUTE_TABLE
+        for skey in (f"_{akey}", f"_ROUTE_TABLE:{prefix.removesuffix('/32')}"):
+            staged = db_hgetall(lab, node, "APPL_DB", skey)
+            if staged:
+                hops.append(Hop("fpmsyncd (written, NOT yet consumed by orchagent)", "APPL_DB", skey, staged))
+                break
+    hops.append(Hop("fpmsyncd -> orchagent consumed", "APPL_DB", akey, appl))
     route_key = asic_route_key(lab, node, prefix)
     route = db_hgetall(lab, node, "ASIC_DB", route_key) if route_key else {}
     hops.append(Hop("orchagent (routeorch)", "ASIC_DB", route_key or f"(no route entry for {prefix})", route))

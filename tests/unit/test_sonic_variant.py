@@ -39,3 +39,19 @@ def test_sonic_without_image_is_rejected():
     d.pop("sonic")
     with pytest.raises(ValidationError):
         model.Fabric.model_validate(d)
+
+
+def test_mtu_is_checked_on_the_routed_interface():
+    """SONiC-VS: the wire (eth1) is 22 bytes bigger than the routed port (Ethernet0); only the port counts."""
+    from fabricx import validators
+    f = model.load(V)
+    up = {"state": "UP"}
+    state = {n.name: {"interfaces": {}} for n in f.spines + f.leaves}
+    for lk in f.fabric_links():
+        for node, ifn in ((lk.spine, lk.spine_if), (lk.leaf, lk.leaf_if)):
+            state[node]["interfaces"][ifn] = dict(up, mtu=f.fabric_mtu + 22 if node == "leaf3" else f.fabric_mtu)
+            if node == "leaf3":
+                state[node]["interfaces"][model.sonic_port(ifn)] = dict(up, mtu=f.fabric_mtu)
+    assert validators.check_mtu(f, state) == []
+    state["leaf3"]["interfaces"]["Ethernet0"]["mtu"] = 1500
+    assert [x.check for x in validators.check_mtu(f, state)] == ["underlay-mtu"]
