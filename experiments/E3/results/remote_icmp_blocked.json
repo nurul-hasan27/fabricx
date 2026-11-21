@@ -1,0 +1,25 @@
+{
+ "scenario": "remote_icmp_blocked",
+ "bad_links": [
+  [
+   "spine2",
+   "eth2"
+  ],
+  [
+   "leaf2",
+   "eth2"
+  ]
+ ],
+ "icmp_blocked_on": [
+  "spine2",
+  "eth1"
+ ],
+ "evidence_ping_1430": "PING 10.10.10.103 (10.10.10.103) 1430(1458) bytes of data.\n\n--- 10.10.10.103 ping statistics ---\n2 packets transmitted, 0 received, 100% packet loss, time 1032ms",
+ "max_df_payload": 1422,
+ "expected_threshold": 1422,
+ "iperf": {
+  "bits_per_second": 0,
+  "retransmits": 4,
+  "error": null
+ }
+}

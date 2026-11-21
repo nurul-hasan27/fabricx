@@ -1,0 +1,16 @@
+{
+ "received": 6455,
+ "sent": 8000,
+ "lost": 1545,
+ "longest_gap_ms": 1546.04614,
+ "reordered": 0,
+ "duplicates": 0,
+ "profile": "isis-bfd",
+ "fault": "gray",
+ "run": 4,
+ "uplink": "eth2",
+ "gap_start_after_inject_ms": 7.182558,
+ "inject_ts_ns": 1795199332488375503,
+ "restore_ts_ns": 1795199340767342675,
+ "interval_ms": 1.0
+}

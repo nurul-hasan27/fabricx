@@ -1,0 +1,9 @@
+{
+ "protocol": "isis",
+ "bfd": "bfd",
+ "fault": "carrier",
+ "n": 10,
+ "min_ms": 2.676513,
+ "median_ms": 3.714293,
+ "max_ms": 2050.664362
+}

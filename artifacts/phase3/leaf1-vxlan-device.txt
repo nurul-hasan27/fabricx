@@ -1,0 +1,3 @@
+7: vx10010: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master br10 state UNKNOWN mode DEFAULT group default qlen 1000
+    link/ether da:87:a1:df:57:d0 brd ff:ff:ff:ff:ff:ff promiscuity 1 allmulti 1 minmtu 68 maxmtu 65535 
+    vxlan id 10010 local 10.0.0.11 srcport 0 0 dstport 4789 ttl auto ageing 300 nolearning 

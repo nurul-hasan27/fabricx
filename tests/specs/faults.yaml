@@ -1,0 +1,42 @@
+# Written BEFORE the implementation (spec-first). Test names are the contract.
+- id: REQ-FAULT-001
+  title: Fault catalogue
+  requirement: At least 12 faults can be injected into the lab, each with inject, restore, a layer, expected customer symptoms and a first-evidence command.
+  steps: ["list the catalogue", "check every fault defines the required fields"]
+  pass: "at least 12 faults; every field present; ids unique"
+  tests:
+    - tests/unit/test_faults.py::test_catalogue_has_at_least_12_complete_faults
+  evidence: [docs/fault-catalogue.md]
+- id: REQ-FAULT-002
+  title: Every fault is reversible
+  requirement: After inject and restore, the fabric returns to a healthy state (validate clean, drift clean).
+  steps: ["baseline green", "inject", "restore", "baseline re-check"]
+  pass: no findings after restore for every fault
+  tests:
+    - tests/lab/test_faults_roundtrip.py::test_every_fault_restores_to_healthy
+  evidence: [artifacts/runs/]
+- id: REQ-FAULT-003
+  title: Evidence bundle per run
+  requirement: Each fault run writes manifest, baseline/during/after snapshots, timeline and a report.
+  steps: ["run one fault with `fabricx run-fault`"]
+  pass: bundle contains the files listed in blueprint 10.2
+  tests:
+    - tests/unit/test_faults.py::test_bundle_layout
+  evidence: [artifacts/runs/]
+- id: REQ-DIAG-001
+  title: Diagnose rules (pure)
+  requirement: Each diagnose rule, given a synthetic deep state with one defect, returns a finding with layer, cause key, evidence and confidence, and returns nothing on a healthy state.
+  steps: ["build a healthy deep state from the inventory", "mutate one thing per rule"]
+  pass: expected cause_key for every rule; none when healthy
+  tests:
+    - tests/unit/test_diagnose.py::test_healthy_state_has_no_findings
+    - tests/unit/test_diagnose.py::test_each_rule_detects_its_defect
+  evidence: [src/fabricx/diagnose.py]
+- id: REQ-DIAG-002
+  title: Blind drill
+  requirement: diagnose localises at least 10 of 12 randomly chosen catalogue faults without being told which was injected, and misses are analysed.
+  steps: ["`fabricx drill --seed S` injects a random fault", "diagnose from live state only", "score cause_key and layer"]
+  pass: "at least 10 of 12 localised"
+  tests:
+    - tests/lab/test_drill.py::test_blind_drill_score_meets_target
+  evidence: [experiments/E9/results.md]

@@ -1,0 +1,37 @@
+- id: REQ-UNDERLAY-001
+  title: eBGP sessions
+  requirement: Every leaf-spine link has an Established eBGP session (12 session ends for 6 links).
+  steps: ["collect `show bgp summary json` on every switch", "compare peers with neighbours derived from the inventory"]
+  pass: all peers Established, none missing
+  tests:
+    - tests/lab/test_phase2_underlay.py::test_all_bgp_sessions_established
+    - tests/unit/test_parsers_validators.py::test_bgp_down_detected
+  evidence: [artifacts/validate/]
+- id: REQ-UNDERLAY-002
+  title: ECMP
+  requirement: Each leaf has one kernel next-hop per spine to every other leaf loopback.
+  steps: ["`ip route show <loopback>` on each leaf", "count `nexthop via` entries"]
+  pass: next-hop count equals number of spines
+  tests:
+    - tests/lab/test_phase2_underlay.py::test_two_kernel_nexthops_to_every_remote_leaf_loopback
+    - tests/unit/test_parsers_validators.py::test_single_nexthop_detected
+  evidence: [artifacts/validate/]
+- id: REQ-UNDERLAY-003
+  title: BFD
+  requirement: BFD is up on every fabric link when enabled in the inventory.
+  steps: ["`show bfd peers json` on every switch"]
+  pass: all peers up
+  tests:
+    - tests/lab/test_phase2_underlay.py::test_bfd_peers_up
+    - tests/unit/test_parsers_validators.py::test_bfd_down_detected
+  evidence: [experiments/E1/results.md]
+- id: REQ-UNDERLAY-004
+  title: Fabric MTU and link state
+  requirement: Every fabric interface is UP with the inventory MTU (9100).
+  steps: ["`ip -j link` on every switch"]
+  pass: no link down, no MTU mismatch
+  tests:
+    - tests/lab/test_phase1_bare_fabric.py::test_link_up_with_mtu_and_pingable_both_ways
+    - tests/unit/test_parsers_validators.py::test_mtu_mismatch_detected
+    - tests/unit/test_parsers_validators.py::test_link_down_detected
+  evidence: [docs/rca/RCA-001-mtu-black-hole.md, experiments/E3/analysis.md]

@@ -1,0 +1,22 @@
+{
+ "scenario": "local",
+ "bad_links": [
+  [
+   "leaf1",
+   "eth2"
+  ],
+  [
+   "spine2",
+   "eth1"
+  ]
+ ],
+ "icmp_blocked_on": null,
+ "evidence_ping_1430": "PING 10.10.10.103 (10.10.10.103) 1430(1458) bytes of data.\nFrom 10.10.10.103 icmp_seq=1 Frag needed and DF set (mtu = 1450)\n\n--- 10.10.10.103 ping statistics ---\n2 packets transmitted, 0 received, +2 errors, 100% packet loss, time 1045ms\n\nping: local error: message too long, mtu=1450",
+ "max_df_payload": 1422,
+ "expected_threshold": 1422,
+ "iperf": {
+  "bits_per_second": 4895097157.512015,
+  "retransmits": 13229,
+  "error": null
+ }
+}

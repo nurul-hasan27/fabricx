@@ -1,0 +1,12 @@
+pyproject.toml
+src/fabricx/__init__.py
+src/fabricx/cli.py
+src/fabricx/diagram.py
+src/fabricx/generate.py
+src/fabricx/model.py
+src/fabricx.egg-info/PKG-INFO
+src/fabricx.egg-info/SOURCES.txt
+src/fabricx.egg-info/dependency_links.txt
+src/fabricx.egg-info/entry_points.txt
+src/fabricx.egg-info/requires.txt
+src/fabricx.egg-info/top_level.txt

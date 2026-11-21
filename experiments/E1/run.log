@@ -1,0 +1,49 @@
+bfd/carrier run 1: lost=3 longest_gap_ms=4.0 starts +2ms uplink=eth2
+bfd/carrier run 2: lost=0 longest_gap_ms=9.4 starts +2579ms uplink=eth2
+bfd/carrier run 3: lost=0 longest_gap_ms=3.3 starts +-1396ms uplink=eth2
+bfd/carrier run 4: lost=0 longest_gap_ms=3.4 starts +-2564ms uplink=eth2
+bfd/carrier run 5: lost=0 longest_gap_ms=3.2 starts +-612ms uplink=eth2
+bfd/carrier run 6: lost=1 longest_gap_ms=100.4 starts +254ms uplink=eth2
+bfd/carrier run 7: lost=1 longest_gap_ms=33.5 starts +-1811ms uplink=eth2
+bfd/carrier run 8: lost=0 longest_gap_ms=4.1 starts +798ms uplink=eth2
+bfd/carrier run 9: lost=0 longest_gap_ms=66.0 starts +505ms uplink=eth2
+bfd/carrier run 10: lost=0 longest_gap_ms=5.0 starts +848ms uplink=eth2
+{"profile": "bfd", "fault": "carrier", "n": 10, "min_ms": 3.155221, "median_ms": 4.580591999999999, "max_ms": 100.39071}
+bfd/gray run 1: lost=820 longest_gap_ms=820.8 starts +8ms uplink=eth2
+bfd/gray run 2: lost=803 longest_gap_ms=804.0 starts +3ms uplink=eth2
+bfd/gray run 3: lost=701 longest_gap_ms=702.0 starts +3ms uplink=eth2
+bfd/gray run 4: lost=854 longest_gap_ms=855.1 starts +4ms uplink=eth2
+bfd/gray run 5: lost=720 longest_gap_ms=721.0 starts +3ms uplink=eth2
+bfd/gray run 6: lost=958 longest_gap_ms=959.0 starts +3ms uplink=eth2
+bfd/gray run 7: lost=703 longest_gap_ms=704.0 starts +3ms uplink=eth2
+bfd/gray run 8: lost=969 longest_gap_ms=970.0 starts +2ms uplink=eth2
+bfd/gray run 9: lost=708 longest_gap_ms=709.0 starts +3ms uplink=eth2
+bfd/gray run 10: lost=923 longest_gap_ms=924.1 starts +3ms uplink=eth2
+{"profile": "bfd", "fault": "gray", "n": 10, "min_ms": 702.040744, "median_ms": 812.4369055, "max_ms": 970.038717}
+nobfd/carrier run 1: lost=1 longest_gap_ms=3.1 starts +-2003ms uplink=eth2
+nobfd/carrier run 2: lost=0 longest_gap_ms=3.0 starts +3102ms uplink=eth2
+nobfd/carrier run 3: lost=0 longest_gap_ms=39.8 starts +-2230ms uplink=eth2
+nobfd/carrier run 4: lost=1 longest_gap_ms=3.3 starts +3463ms uplink=eth2
+nobfd/carrier run 5: lost=0 longest_gap_ms=2.7 starts +5013ms uplink=eth2
+nobfd/carrier run 6: lost=0 longest_gap_ms=3.0 starts +-78ms uplink=eth2
+nobfd/carrier run 7: lost=0 longest_gap_ms=2.1 starts +1713ms uplink=eth2
+nobfd/carrier run 8: lost=1 longest_gap_ms=3.6 starts +3957ms uplink=eth2
+nobfd/carrier run 9: lost=0 longest_gap_ms=5.1 starts +2100ms uplink=eth2
+nobfd/carrier run 10: lost=0 longest_gap_ms=89.5 starts +2089ms uplink=eth2
+{"profile": "nobfd", "fault": "carrier", "n": 10, "min_ms": 2.112795, "median_ms": 3.2088695, "max_ms": 89.500218}
+nobfd/gray run 1: lost=11130 longest_gap_ms=11329.3 starts +5ms uplink=eth2
+nobfd/gray run 2: lost=10603 longest_gap_ms=10604.4 starts +4ms uplink=eth2
+nobfd/gray run 3: lost=10330 longest_gap_ms=10332.1 starts +4ms uplink=eth2
+nobfd/gray run 4: lost=8995 longest_gap_ms=8996.5 starts +3ms uplink=eth2
+nobfd/gray run 5: lost=8470 longest_gap_ms=8669.9 starts +9ms uplink=eth2
+nobfd/gray run 6: lost=10588 longest_gap_ms=10589.1 starts +3ms uplink=eth2
+nobfd/gray run 7: lost=10238 longest_gap_ms=10239.1 starts +3ms uplink=eth2
+nobfd/gray run 8: lost=8898 longest_gap_ms=8899.9 starts +8ms uplink=eth2
+nobfd/gray run 9: lost=7749 longest_gap_ms=7750.2 starts +4ms uplink=eth2
+nobfd/gray run 10: lost=10396 longest_gap_ms=10595.2 starts +3ms uplink=eth2
+{"profile": "nobfd", "fault": "gray", "n": 10, "min_ms": 7750.207704, "median_ms": 10285.628681, "max_ms": 11329.264498}
+default/gray run 1: lost=196996 longest_gap_ms=1.6 starts +-1391ms uplink=eth2
+default/gray run 2: lost=191929 longest_gap_ms=191943.0 starts +5ms uplink=eth2
+default/gray run 3: lost=166392 longest_gap_ms=140755.8 starts +28254ms uplink=eth2
+{"profile": "default", "fault": "gray", "n": 3, "min_ms": 1.640637, "median_ms": 140755.815967, "max_ms": 191943.040661}
+baseline restored

@@ -1,0 +1,45 @@
+# THE source of truth. Every IP, ASN, VNI and VLAN lives here and nowhere else.
+name: fabricx
+frr_image: quay.io/frrouting/frr:10.2.1
+host_image: fabricx-host:1   # built from images/host/Dockerfile
+vxlan_df: "set"   # RFC 7348: VTEPs must not fragment; outer DF bit always set
+ecmp_hash_policy: 1   # fib_multipath_hash_policy: 0=L3 only, 1=L3+L4 (E2 showed 0 pins all routed flows to one uplink)
+fabric_mtu: 9100
+host_mtu: 1500
+fabric_link_base: 10.1.0.0/16   # link = base + <spine#>.<2*(leaf#-1)> as a /31
+
+anycast_gw_mac: "02:fa:b0:00:00:01"   # same virtual MAC on every leaf's gateway
+
+underlay:
+  protocol: isis
+  bgp_keepalive: 3
+  bgp_hold: 9
+  bfd_enabled: true
+  bfd_interval_ms: 300
+  bfd_multiplier: 3
+  max_paths: 2
+
+vrfs:
+  - {name: RED,  l3vni: 50001}
+  - {name: BLUE, l3vni: 50002}
+
+vlans:
+  - {id: 10, vni: 10010, subnet: 10.10.10.0/24, vrf: RED}
+  - {id: 20, vni: 10020, subnet: 10.20.20.0/24, vrf: RED}
+  - {id: 30, vni: 10030, subnet: 10.30.30.0/24, vrf: BLUE}
+
+spines:
+  - {name: spine1, asn: 65000, loopback: 10.0.0.1}
+  - {name: spine2, asn: 65000, loopback: 10.0.0.2}
+
+leaves:
+  - {name: leaf1, asn: 65001, loopback: 10.0.0.11}
+  - {name: leaf2, asn: 65002, loopback: 10.0.0.12}
+  - {name: leaf3, asn: 65003, loopback: 10.0.0.13}
+
+hosts:
+  - {name: h1, leaf: leaf1, ip: 10.10.10.101, vlan: 10}
+  - {name: h2, leaf: leaf1, ip: 10.20.20.102, vlan: 20}
+  - {name: h3, leaf: leaf2, ip: 10.10.10.103, vlan: 10}
+  - {name: h4, leaf: leaf2, ip: 10.20.20.104, vlan: 20}
+  - {name: h5, leaf: leaf3, ip: 10.30.30.105, vlan: 30}

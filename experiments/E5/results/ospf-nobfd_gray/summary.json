@@ -1,0 +1,9 @@
+{
+ "protocol": "ospf",
+ "bfd": "nobfd",
+ "fault": "gray",
+ "n": 3,
+ "min_ms": 73.689618,
+ "median_ms": 6998.639371,
+ "max_ms": 31107.246177
+}

@@ -1,0 +1,393 @@
+{
+ "seed": 11,
+ "localised": 12,
+ "total": 14,
+ "results": [
+  {
+   "fault": "F11",
+   "name": "ECMP hash policy L3-only",
+   "expected_cause": "ecmp-hash-policy",
+   "layer": "Forwarding",
+   "diagnosed_causes": [
+    "ecmp-hash-policy"
+   ],
+   "localised": true,
+   "primary_layer": "Forwarding",
+   "expected_failing": [],
+   "observed_failing": [],
+   "symptoms_match_hypothesis": true,
+   "isolation_breach": false,
+   "healthy_after_restore": true,
+   "timeline": {
+    "fault": "F11",
+    "baseline_wait_s": 2.1538288593292236,
+    "inject_ts": 1795194822.083227,
+    "observed_ts": 1795194829.337145,
+    "diagnosed_ts": 1795194840.825168,
+    "restore_ts": 1795194840.938206,
+    "recovery_s": 1.8785979747772217,
+    "healthy_again_ts": 1795194844.859971
+   },
+   "run_dir": "artifacts/runs/2026-11-20T17-13-32Z_F11"
+  },
+  {
+   "fault": "F06",
+   "name": "BGP ASN mismatch",
+   "expected_cause": "bgp-asn-mismatch",
+   "layer": "BGP sessions",
+   "diagnosed_causes": [],
+   "localised": false,
+   "primary_layer": null,
+   "expected_failing": [],
+   "observed_failing": [],
+   "symptoms_match_hypothesis": true,
+   "isolation_breach": false,
+   "healthy_after_restore": true,
+   "timeline": {
+    "fault": "F06",
+    "baseline_wait_s": 1.9025390148162842,
+    "inject_ts": 1795194854.448292,
+    "observed_ts": 1795194871.463735,
+    "diagnosed_ts": 1795194883.708918,
+    "restore_ts": 1795194883.851831,
+    "recovery_s": 7.898072004318237,
+    "healthy_again_ts": 1795194893.60031
+   },
+   "run_dir": "artifacts/runs/2026-11-20T17-14-04Z_F06"
+  },
+  {
+   "fault": "F01",
+   "name": "Leaf-spine link down",
+   "expected_cause": "link-down",
+   "layer": "L1 links",
+   "diagnosed_causes": [
+    "link-down"
+   ],
+   "localised": true,
+   "primary_layer": "L1 links",
+   "expected_failing": [],
+   "observed_failing": [],
+   "symptoms_match_hypothesis": true,
+   "isolation_breach": false,
+   "healthy_after_restore": true,
+   "timeline": {
+    "fault": "F01",
+    "baseline_wait_s": 1.9085299968719482,
+    "inject_ts": 1795194903.3508842,
+    "observed_ts": 1795194917.435413,
+    "diagnosed_ts": 1795194929.9800918,
+    "restore_ts": 1795194930.106993,
+    "recovery_s": 8.301022052764893,
+    "healthy_again_ts": 1795194941.578288
+   },
+   "run_dir": "artifacts/runs/2026-11-20T17-14-53Z_F01"
+  },
+  {
+   "fault": "F02",
+   "name": "Gray failure (both directions)",
+   "expected_cause": "gray-failure",
+   "layer": "L1 links",
+   "diagnosed_causes": [
+    "gray-failure"
+   ],
+   "localised": true,
+   "primary_layer": "L1 links",
+   "expected_failing": [],
+   "observed_failing": [],
+   "symptoms_match_hypothesis": true,
+   "isolation_breach": false,
+   "healthy_after_restore": true,
+   "timeline": {
+    "fault": "F02",
+    "baseline_wait_s": 1.8397529125213623,
+    "inject_ts": 1795194951.157846,
+    "observed_ts": 1795194968.2412338,
+    "diagnosed_ts": 1795194980.998816,
+    "restore_ts": 1795194981.2087839,
+    "recovery_s": 8.784049034118652,
+    "healthy_again_ts": 1795194991.9226859
+   },
+   "run_dir": "artifacts/runs/2026-11-20T17-15-41Z_F02"
+  },
+  {
+   "fault": "F10",
+   "name": "Missing L3VNI on one leaf",
+   "expected_cause": "missing-l3vni",
+   "layer": "VNI/VLAN maps",
+   "diagnosed_causes": [
+    "missing-l3vni"
+   ],
+   "localised": true,
+   "primary_layer": "VNI/VLAN maps",
+   "expected_failing": [
+    "c3"
+   ],
+   "observed_failing": [],
+   "symptoms_match_hypothesis": false,
+   "isolation_breach": false,
+   "healthy_after_restore": true,
+   "timeline": {
+    "fault": "F10",
+    "baseline_wait_s": 2.0919151306152344,
+    "inject_ts": 1795195001.6532102,
+    "observed_ts": 1795195018.8172622,
+    "diagnosed_ts": 1795195031.868897,
+    "restore_ts": 1795195031.996497,
+    "recovery_s": 1.8566296100616455,
+    "healthy_again_ts": 1795195035.779145
+   },
+   "run_dir": "artifacts/runs/2026-11-20T17-16-31Z_F10"
+  },
+  {
+   "fault": "F05",
+   "name": "Underlay MTU 1500 on one link",
+   "expected_cause": "underlay-mtu",
+   "layer": "Underlay MTU",
+   "diagnosed_causes": [
+    "underlay-mtu"
+   ],
+   "localised": true,
+   "primary_layer": "Underlay MTU",
+   "expected_failing": [],
+   "observed_failing": [],
+   "symptoms_match_hypothesis": true,
+   "isolation_breach": false,
+   "healthy_after_restore": true,
+   "timeline": {
+    "fault": "F05",
+    "baseline_wait_s": 1.8156518936157227,
+    "inject_ts": 1795195045.3130019,
+    "observed_ts": 1795195057.500412,
+    "diagnosed_ts": 1795195068.732432,
+    "restore_ts": 1795195068.9196239,
+    "recovery_s": 2.3880488872528076,
+    "healthy_again_ts": 1795195073.233195
+   },
+   "run_dir": "artifacts/runs/2026-11-20T17-17-15Z_F05"
+  },
+  {
+   "fault": "F07",
+   "name": "Loopback not advertised",
+   "expected_cause": "loopback-not-advertised",
+   "layer": "VTEP reachability",
+   "diagnosed_causes": [
+    "loopback-not-advertised"
+   ],
+   "localised": true,
+   "primary_layer": "VTEP reachability",
+   "expected_failing": [],
+   "observed_failing": [],
+   "symptoms_match_hypothesis": true,
+   "isolation_breach": false,
+   "healthy_after_restore": true,
+   "timeline": {
+    "fault": "F07",
+    "baseline_wait_s": 1.9517719745635986,
+    "inject_ts": 1795195082.8710852,
+    "observed_ts": 1795195096.984307,
+    "diagnosed_ts": 1795195108.027904,
+    "restore_ts": 1795195108.154512,
+    "recovery_s": 3.237622022628784,
+    "healthy_again_ts": 1795195113.3773189
+   },
+   "run_dir": "artifacts/runs/2026-11-20T17-17-53Z_F07"
+  },
+  {
+   "fault": "F03",
+   "name": "Unidirectional loss",
+   "expected_cause": "unidirectional-loss",
+   "layer": "L1 links",
+   "diagnosed_causes": [
+    "unidirectional-loss"
+   ],
+   "localised": true,
+   "primary_layer": "L1 links",
+   "expected_failing": [],
+   "observed_failing": [],
+   "symptoms_match_hypothesis": true,
+   "isolation_breach": false,
+   "healthy_after_restore": true,
+   "timeline": {
+    "fault": "F03",
+    "baseline_wait_s": 2.2964329719543457,
+    "inject_ts": 1795195123.765517,
+    "observed_ts": 1795195140.967891,
+    "diagnosed_ts": 1795195153.538505,
+    "restore_ts": 1795195153.648681,
+    "recovery_s": 7.984058856964111,
+    "healthy_again_ts": 1795195163.481619
+   },
+   "run_dir": "artifacts/runs/2026-11-20T17-18-33Z_F03"
+  },
+  {
+   "fault": "F04",
+   "name": "Lossy link (2%)",
+   "expected_cause": "lossy-link",
+   "layer": "L1 links",
+   "diagnosed_causes": [
+    "lossy-link"
+   ],
+   "localised": true,
+   "primary_layer": "L1 links",
+   "expected_failing": [],
+   "observed_failing": [],
+   "symptoms_match_hypothesis": true,
+   "isolation_breach": false,
+   "healthy_after_restore": true,
+   "timeline": {
+    "fault": "F04",
+    "baseline_wait_s": 1.8747150897979736,
+    "inject_ts": 1795195173.0578408,
+    "observed_ts": 1795195187.2322109,
+    "diagnosed_ts": 1795195200.33146,
+    "restore_ts": 1795195200.458876,
+    "recovery_s": 1.903709888458252,
+    "healthy_again_ts": 1795195204.375336
+   },
+   "run_dir": "artifacts/runs/2026-11-20T17-19-23Z_F04"
+  },
+  {
+   "fault": "F13",
+   "name": "bgpd hung on a spine",
+   "expected_cause": "bgp-daemon-hung",
+   "layer": "BGP sessions",
+   "diagnosed_causes": [
+    "bgp-daemon-hung"
+   ],
+   "localised": true,
+   "primary_layer": "BGP sessions",
+   "expected_failing": [],
+   "observed_failing": [],
+   "symptoms_match_hypothesis": true,
+   "isolation_breach": false,
+   "healthy_after_restore": true,
+   "timeline": {
+    "fault": "F13",
+    "baseline_wait_s": 1.925342082977295,
+    "inject_ts": 1795195214.139648,
+    "observed_ts": 1795195266.484297,
+    "diagnosed_ts": 1795195292.6096919,
+    "restore_ts": 1795195292.751277,
+    "recovery_s": 8.040485143661499,
+    "healthy_again_ts": 1795195302.7620149
+   },
+   "run_dir": "artifacts/runs/2026-11-20T17-20-04Z_F13"
+  },
+  {
+   "fault": "F12",
+   "name": "Duplicate MAC on two leaves",
+   "expected_cause": "duplicate-mac",
+   "layer": "FDB / ARP",
+   "diagnosed_causes": [],
+   "localised": false,
+   "primary_layer": null,
+   "expected_failing": [],
+   "observed_failing": [
+    "c1"
+   ],
+   "symptoms_match_hypothesis": false,
+   "isolation_breach": false,
+   "healthy_after_restore": true,
+   "timeline": {
+    "fault": "F12",
+    "baseline_wait_s": 1.9019932746887207,
+    "inject_ts": 1795195313.2041569,
+    "observed_ts": 1795195330.83153,
+    "diagnosed_ts": 1795195343.033273,
+    "restore_ts": 1795195343.208551,
+    "recovery_s": 1.946882963180542,
+    "healthy_again_ts": 1795195347.3038452
+   },
+   "run_dir": "artifacts/runs/2026-11-20T17-21-42Z_F12"
+  },
+  {
+   "fault": "F14",
+   "name": "Anycast gateway MAC mismatch",
+   "expected_cause": "gateway-mac-mismatch",
+   "layer": "FDB / ARP",
+   "diagnosed_causes": [
+    "gateway-mac-mismatch"
+   ],
+   "localised": true,
+   "primary_layer": "FDB / ARP",
+   "expected_failing": [],
+   "observed_failing": [],
+   "symptoms_match_hypothesis": true,
+   "isolation_breach": false,
+   "healthy_after_restore": true,
+   "timeline": {
+    "fault": "F14",
+    "baseline_wait_s": 2.019893169403076,
+    "inject_ts": 1795195357.045621,
+    "observed_ts": 1795195369.161864,
+    "diagnosed_ts": 1795195380.6684349,
+    "restore_ts": 1795195380.797945,
+    "recovery_s": 2.0192909240722656,
+    "healthy_again_ts": 1795195385.614273
+   },
+   "run_dir": "artifacts/runs/2026-11-20T17-22-27Z_F14"
+  },
+  {
+   "fault": "F09",
+   "name": "VNI/VLAN mapping mismatch",
+   "expected_cause": "vni-mismatch",
+   "layer": "VNI/VLAN maps",
+   "diagnosed_causes": [
+    "vni-mismatch"
+   ],
+   "localised": true,
+   "primary_layer": "VNI/VLAN maps",
+   "expected_failing": [
+    "c1"
+   ],
+   "observed_failing": [
+    "c1"
+   ],
+   "symptoms_match_hypothesis": true,
+   "isolation_breach": false,
+   "healthy_after_restore": true,
+   "timeline": {
+    "fault": "F09",
+    "baseline_wait_s": 2.1053919792175293,
+    "inject_ts": 1795195395.507353,
+    "observed_ts": 1795195412.6559942,
+    "diagnosed_ts": 1795195424.759752,
+    "restore_ts": 1795195424.970933,
+    "recovery_s": 2.2677090167999268,
+    "healthy_again_ts": 1795195429.2964768
+   },
+   "run_dir": "artifacts/runs/2026-11-20T17-23-05Z_F09"
+  },
+  {
+   "fault": "F08",
+   "name": "Route-target mismatch on one VNI",
+   "expected_cause": "rt-mismatch",
+   "layer": "EVPN routes",
+   "diagnosed_causes": [
+    "rt-mismatch"
+   ],
+   "localised": true,
+   "primary_layer": "EVPN routes",
+   "expected_failing": [
+    "c1"
+   ],
+   "observed_failing": [
+    "c1"
+   ],
+   "symptoms_match_hypothesis": true,
+   "isolation_breach": false,
+   "healthy_after_restore": true,
+   "timeline": {
+    "fault": "F08",
+    "baseline_wait_s": 1.9933030605316162,
+    "inject_ts": 1795195439.5393322,
+    "observed_ts": 1795195457.119253,
+    "diagnosed_ts": 1795195470.258496,
+    "restore_ts": 1795195470.383926,
+    "recovery_s": 1.9905550479888916,
+    "healthy_again_ts": 1795195474.466068
+   },
+   "run_dir": "artifacts/runs/2026-11-20T17-23-49Z_F08"
+  }
+ ]
+}

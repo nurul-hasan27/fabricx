@@ -1,0 +1,58 @@
+FAIL evpn-type5-missing leaf2: no Type-5 for 10.30.30.0/24
+FAIL evpn-type5-missing leaf3: no Type-5 for 10.30.30.0/24
+3 findings
+ospf-bfd/carrier run 1: lost=0 gap=4.4 ms
+ospf-bfd/carrier run 2: lost=0 gap=12.1 ms
+ospf-bfd/carrier run 3: lost=0 gap=3.5 ms
+ospf-bfd/carrier run 4: lost=0 gap=3.3 ms
+ospf-bfd/carrier run 5: lost=0 gap=4.4 ms
+ospf-bfd/carrier run 6: lost=1 gap=6.6 ms
+ospf-bfd/carrier run 7: lost=0 gap=3.6 ms
+ospf-bfd/carrier run 8: lost=0 gap=42.3 ms
+ospf-bfd/carrier run 9: lost=0 gap=39.8 ms
+ospf-bfd/carrier run 10: lost=0 gap=2.8 ms
+{"protocol": "ospf", "bfd": "bfd", "fault": "carrier", "n": 10, "min_ms": 2.812044, "median_ms": 4.395607, "max_ms": 42.29512}
+ospf-bfd/gray run 1: lost=878 gap=879.1 ms
+ospf-bfd/gray run 2: lost=737 gap=738.1 ms
+ospf-bfd/gray run 3: lost=752 gap=753.0 ms
+ospf-bfd/gray run 4: lost=843 gap=844.1 ms
+ospf-bfd/gray run 5: lost=0 gap=2.3 ms
+ospf-bfd/gray run 6: lost=0 gap=182.7 ms
+ospf-bfd/gray run 7: lost=640 gap=641.7 ms
+ospf-bfd/gray run 8: lost=699 gap=700.1 ms
+ospf-bfd/gray run 9: lost=794 gap=795.0 ms
+ospf-bfd/gray run 10: lost=858 gap=859.1 ms
+{"protocol": "ospf", "bfd": "bfd", "fault": "gray", "n": 10, "min_ms": 2.323643, "median_ms": 745.5559430000001, "max_ms": 879.07515}
+ospf-nobfd/gray run 1: lost=0 gap=73.7 ms
+ospf-nobfd/gray run 2: lost=14422 gap=6998.6 ms
+ospf-nobfd/gray run 3: lost=31105 gap=31107.2 ms
+{"protocol": "ospf", "bfd": "nobfd", "fault": "gray", "n": 3, "min_ms": 73.689618, "median_ms": 6998.639371, "max_ms": 31107.246177}
+report: artifacts/validate/2026-11-20T18-20-53Z/report.md
+PASS
+isis-bfd/carrier run 1: lost=0 gap=3.3 ms
+isis-bfd/carrier run 2: lost=1 gap=4.2 ms
+isis-bfd/carrier run 3: lost=1669 gap=2050.7 ms
+isis-bfd/carrier run 4: lost=1 gap=2.7 ms
+isis-bfd/carrier run 5: lost=0 gap=2.9 ms
+isis-bfd/carrier run 6: lost=0 gap=4.5 ms
+isis-bfd/carrier run 7: lost=0 gap=63.4 ms
+isis-bfd/carrier run 8: lost=0 gap=3.5 ms
+isis-bfd/carrier run 9: lost=1913 gap=4.0 ms
+isis-bfd/carrier run 10: lost=5719 gap=3.1 ms
+{"protocol": "isis", "bfd": "bfd", "fault": "carrier", "n": 10, "min_ms": 2.676513, "median_ms": 3.714293, "max_ms": 2050.664362}
+isis-bfd/gray run 1: lost=1769 gap=1770.1 ms
+isis-bfd/gray run 2: lost=0 gap=4.5 ms
+isis-bfd/gray run 3: lost=1775 gap=1776.9 ms
+isis-bfd/gray run 4: lost=1545 gap=1546.0 ms
+isis-bfd/gray run 5: lost=1621 gap=1622.1 ms
+isis-bfd/gray run 6: lost=1691 gap=1692.1 ms
+isis-bfd/gray run 7: lost=0 gap=3.8 ms
+isis-bfd/gray run 8: lost=0 gap=5.0 ms
+isis-bfd/gray run 9: lost=1582 gap=1583.1 ms
+isis-bfd/gray run 10: lost=0 gap=3.4 ms
+{"protocol": "isis", "bfd": "bfd", "fault": "gray", "n": 10, "min_ms": 3.426056, "median_ms": 1564.548186, "max_ms": 1776.86122}
+isis-nobfd/gray run 1: lost=17997 gap=17998.8 ms
+isis-nobfd/gray run 2: lost=20358 gap=17032.4 ms
+isis-nobfd/gray run 3: lost=17649 gap=17651.8 ms
+{"protocol": "isis", "bfd": "nobfd", "fault": "gray", "n": 3, "min_ms": 17032.369882, "median_ms": 17651.797161, "max_ms": 17998.822279}
+baseline restored

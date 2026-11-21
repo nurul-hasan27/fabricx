@@ -1,0 +1,140 @@
+{
+ "policy0": [
+  {
+   "policy": 0,
+   "tx_packets": {
+    "leaf1:eth1": 3314577,
+    "leaf1:eth2": 26,
+    "spine1:eth2": 3314577,
+    "spine2:eth2": 25
+   },
+   "iperf_Mbps": 7553,
+   "distinct_outer_udp_src_ports": 65,
+   "leaf1_uplinks": {
+    "share": [
+     1.0,
+     0.0
+    ],
+    "imbalance_ratio": 127483.73
+   },
+   "spine_downlinks_to_leaf2": {
+    "share": [
+     1.0,
+     0.0
+    ],
+    "imbalance_ratio": 132583.08
+   }
+  },
+  {
+   "policy": 0,
+   "tx_packets": {
+    "leaf1:eth1": 3398594,
+    "leaf1:eth2": 24,
+    "spine1:eth2": 3398603,
+    "spine2:eth2": 25
+   },
+   "iperf_Mbps": 7838,
+   "distinct_outer_udp_src_ports": 64,
+   "leaf1_uplinks": {
+    "share": [
+     1.0,
+     0.0
+    ],
+    "imbalance_ratio": 141608.08
+   },
+   "spine_downlinks_to_leaf2": {
+    "share": [
+     1.0,
+     0.0
+    ],
+    "imbalance_ratio": 135944.12
+   }
+  }
+ ],
+ "policy1": [
+  {
+   "policy": 1,
+   "tx_packets": {
+    "leaf1:eth1": 3051756,
+    "leaf1:eth2": 24,
+    "spine1:eth2": 3051759,
+    "spine2:eth2": 25
+   },
+   "iperf_Mbps": 7001,
+   "distinct_outer_udp_src_ports": 65,
+   "leaf1_uplinks": {
+    "share": [
+     1.0,
+     0.0
+    ],
+    "imbalance_ratio": 127156.5
+   },
+   "spine_downlinks_to_leaf2": {
+    "share": [
+     1.0,
+     0.0
+    ],
+    "imbalance_ratio": 122070.36
+   }
+  },
+  {
+   "policy": 1,
+   "tx_packets": {
+    "leaf1:eth1": 3239425,
+    "leaf1:eth2": 23,
+    "spine1:eth2": 3239427,
+    "spine2:eth2": 25
+   },
+   "iperf_Mbps": 7411,
+   "distinct_outer_udp_src_ports": 64,
+   "leaf1_uplinks": {
+    "share": [
+     1.0,
+     0.0
+    ],
+    "imbalance_ratio": 140844.57
+   },
+   "spine_downlinks_to_leaf2": {
+    "share": [
+     1.0,
+     0.0
+    ],
+    "imbalance_ratio": 129577.08
+   }
+  }
+ ],
+ "control_plain_routed_flows": [
+  {
+   "policy": 0,
+   "kind": "plain_udp_64_flows",
+   "leaf1_uplink_share": [
+    1.0,
+    0.0
+   ]
+  },
+  {
+   "policy": 1,
+   "kind": "plain_udp_64_flows",
+   "leaf1_uplink_share": [
+    0.531,
+    0.469
+   ]
+  },
+  {
+   "policy": 0,
+   "kind": "plain_udp_64_flows",
+   "leaf1_uplink_share": [
+    1.0,
+    0.0
+   ]
+  },
+  {
+   "policy": 1,
+   "kind": "plain_udp_64_flows",
+   "leaf1_uplink_share": [
+    0.578,
+    0.422
+   ]
+  }
+ ]
+}

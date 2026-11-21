@@ -1,0 +1,32 @@
+[project]
+name = "fabricx"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = ["pydantic", "jinja2", "typer", "pyyaml"]
+[project.scripts]
+fabricx = "fabricx.cli:app"
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+[tool.setuptools.packages.find]
+where = ["src"]
+[tool.pytest.ini_options]
+markers = ["lab: needs the deployed lab", "smoke: fast health checks", "functional: behaviour checks", "resilience: fault tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 120
+src = ["src", "tests", "experiments"]
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+[tool.mypy]
+python_version = "3.12"
+files = ["src/fabricx"]
+ignore_missing_imports = true
+check_untyped_defs = true
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["E702", "E501"]
+"experiments/**" = ["E501", "B905", "E741"]
+"src/fabricx/diagnose.py" = ["E501"]   # long human-readable evidence strings
+"src/fabricx/faults/catalogue.py" = ["E501"]
+"src/fabricx/faults/runner.py" = ["E501"]

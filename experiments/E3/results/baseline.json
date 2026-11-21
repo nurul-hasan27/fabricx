@@ -1,0 +1,9 @@
+{
+ "scenario": "baseline",
+ "max_df_payload": 1472,
+ "iperf": {
+  "bits_per_second": 5255963847.961572,
+  "retransmits": 20452,
+  "error": null
+ }
+}

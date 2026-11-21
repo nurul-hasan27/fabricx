@@ -1,0 +1,19 @@
+- id: REQ-SONIC-001
+  title: Lossless QoS configuration auditor
+  requirement: The auditor accepts a consistent SONiC CONFIG_DB and reports the right check id for each inconsistency (missing map, DSCP gap, PG/queue mismatch, lossy class sharing a lossless queue, no xoff, no ECN, bad WRED thresholds, no watchdog, ports disagreeing).
+  steps: ["audit a consistent synthetic CONFIG_DB", "mutate it one inconsistency at a time and audit again"]
+  pass: zero findings when consistent; the expected check id when broken
+  tests:
+    - tests/unit/test_qos_lossless.py::test_good_config_has_no_findings
+    - tests/unit/test_qos_lossless.py::test_each_inconsistency_is_found
+    - tests/unit/test_qos_lossless.py::test_ports_disagreeing_on_lossless_priorities
+  evidence: [tests/fixtures/sonic_config_db_lossless_good.json]
+- id: REQ-SONIC-002
+  title: SONiC route trace logic (fake node only)
+  requirement: The tracer follows a prefix from APPL_DB to the ASIC_DB route entry and next hop, and shows where the chain stops. Verified against a fake node; NOT yet against a real SONiC image.
+  steps: ["run the tracer against a scripted fake node"]
+  pass: hops in order APPL_DB, ASIC_DB, ASIC_DB; a missing hop is shown as empty
+  tests:
+    - tests/unit/test_sonic_adapter.py::test_trace_follows_appl_to_asic_to_nexthop
+    - tests/unit/test_sonic_adapter.py::test_trace_shows_where_chain_stops
+  evidence: [src/fabricx/adapters/sonic.py]

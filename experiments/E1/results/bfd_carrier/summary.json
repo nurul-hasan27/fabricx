@@ -1,0 +1,8 @@
+{
+ "profile": "bfd",
+ "fault": "carrier",
+ "n": 10,
+ "min_ms": 3.155221,
+ "median_ms": 4.580591999999999,
+ "max_ms": 100.39071
+}

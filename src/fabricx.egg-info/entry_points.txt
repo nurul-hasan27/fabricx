@@ -1,0 +1,2 @@
+[console_scripts]
+fabricx = fabricx.cli:app

@@ -1,0 +1,8 @@
+{
+ "profile": "nobfd",
+ "fault": "carrier",
+ "n": 10,
+ "min_ms": 2.112795,
+ "median_ms": 3.2088695,
+ "max_ms": 89.500218
+}

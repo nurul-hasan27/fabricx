@@ -1,0 +1,95 @@
+{
+ "seed": 33,
+ "localised": 3,
+ "total": 3,
+ "results": [
+  {
+   "fault": "F12",
+   "name": "Duplicate MAC on two leaves",
+   "expected_cause": "duplicate-mac",
+   "layer": "FDB / ARP",
+   "diagnosed_causes": [
+    "duplicate-mac"
+   ],
+   "localised": true,
+   "primary_layer": "FDB / ARP",
+   "expected_failing": [],
+   "observed_failing": [
+    "c1"
+   ],
+   "symptoms_match_hypothesis": false,
+   "isolation_breach": false,
+   "healthy_after_restore": true,
+   "timeline": {
+    "fault": "F12",
+    "baseline_wait_s": 1.8137049674987793,
+    "inject_ts": 1795201132.854295,
+    "observed_ts": 1795201150.481138,
+    "diagnosed_ts": 1795201163.196563,
+    "restore_ts": 1795201166.855175,
+    "recovery_s": 1.8221349716186523,
+    "healthy_again_ts": 1795201170.571468
+   },
+   "run_dir": "artifacts/runs/2026-11-20T18-58-43Z_F12"
+  },
+  {
+   "fault": "F08",
+   "name": "Route-target mismatch on one VNI",
+   "expected_cause": "rt-mismatch",
+   "layer": "EVPN routes",
+   "diagnosed_causes": [
+    "rt-mismatch"
+   ],
+   "localised": true,
+   "primary_layer": "EVPN routes",
+   "expected_failing": [
+    "c1"
+   ],
+   "observed_failing": [
+    "c1"
+   ],
+   "symptoms_match_hypothesis": true,
+   "isolation_breach": false,
+   "healthy_after_restore": true,
+   "timeline": {
+    "fault": "F08",
+    "baseline_wait_s": 2.2263689041137695,
+    "inject_ts": 1795201180.665878,
+    "observed_ts": 1795201197.907107,
+    "diagnosed_ts": 1795201210.8028219,
+    "restore_ts": 1795201210.995397,
+    "recovery_s": 2.2142772674560547,
+    "healthy_again_ts": 1795201215.212218
+   },
+   "run_dir": "artifacts/runs/2026-11-20T18-59-30Z_F08"
+  },
+  {
+   "fault": "F13",
+   "name": "bgpd hung on a spine",
+   "expected_cause": "bgp-daemon-hung",
+   "layer": "BGP sessions",
+   "diagnosed_causes": [
+    "bgp-daemon-hung",
+    "bgp-session-down"
+   ],
+   "localised": true,
+   "primary_layer": "BGP sessions",
+   "expected_failing": [],
+   "observed_failing": [],
+   "symptoms_match_hypothesis": true,
+   "isolation_breach": false,
+   "healthy_after_restore": true,
+   "timeline": {
+    "fault": "F13",
+    "baseline_wait_s": 1.8067259788513184,
+    "inject_ts": 1795201224.676016,
+    "observed_ts": 1795201276.707871,
+    "diagnosed_ts": 1795201311.4227688,
+    "restore_ts": 1795201311.534186,
+    "recovery_s": 7.830548048019409,
+    "healthy_again_ts": 1795201321.248678
+   },
+   "run_dir": "artifacts/runs/2026-11-20T19-00-15Z_F13"
+  }
+ ]
+}

@@ -1,0 +1,77 @@
+name: ci
+on:
+  push:
+  pull_request:
+jobs:
+  lint-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -e . pytest ruff mypy types-PyYAML
+      - run: ruff check .
+      - run: mypy
+      - run: pytest tests/unit -q
+      - name: Config diff (generated files must match the inventory)
+        run: |
+          fabricx generate
+          git diff --exit-code -- generated docs/topology.md || (echo "generated files are out of date: run 'fabricx generate' and commit" && exit 1)
+      - name: Traceability (specs must point at real tests)
+        run: fabricx trace
+
+  lab:
+    needs: lint-unit
+    timeout-minutes: 20
+    runs-on: ubuntu-latest   # x86_64, 4 vCPU / 16 GB
+    env:
+      FABRICX_EXEC: sudo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: python -m venv .venv && .venv/bin/pip install -e . pytest pytest-timeout
+      - name: Install Containerlab 0.83.0 and tcpdump
+        run: |
+          curl -sLO https://github.com/srl-labs/containerlab/releases/download/v0.83.0/containerlab_0.83.0_linux_amd64.deb
+          sudo dpkg -i containerlab_0.83.0_linux_amd64.deb
+          sudo apt-get install -y tcpdump
+      - run: sudo docker build -t fabricx-host:1 images/host
+      - run: make RUN=sudo fabric-up
+      - name: Wait for convergence
+        run: sleep 45
+      - name: Smoke + functional + validation + drift
+        run: |
+          .venv/bin/pytest tests -v --timeout=400 -m "not resilience" --junitxml=artifacts/junit.xml
+          .venv/bin/fabricx validate
+          .venv/bin/fabricx drift
+      - name: Diagnostics on failure
+        if: failure()
+        run: |
+          .venv/bin/fabricx validate || true
+          sudo docker ps -a --format '{{.Names}} {{.Status}}' || true
+          for n in leaf1 leaf2 leaf3 spine1 spine2; do echo "== $n"; sudo docker exec clab-fabricx-$n vtysh -c 'show bgp summary' -c 'show bfd peers brief' || true; done
+          for n in leaf1 leaf3; do echo "== VRF/EVPN $n"; sudo docker exec clab-fabricx-$n vtysh -c 'show vrf' -c 'show evpn vni' -c 'show bgp vrf all ipv4 unicast' -c 'show bgp l2vpn evpn route type prefix' || true; sudo docker exec clab-fabricx-$n ip -br link; sudo docker exec clab-fabricx-$n sh -c 'ps -eo pid,lstart,cmd | grep -E "bgpd|zebra" | head -4'; done
+          sudo docker exec clab-fabricx-leaf1 vtysh -c 'show running-config' | sed -n '/^vrf RED/,/^exit-vrf/p;/router bgp 65001 vrf RED/,/^exit/p' || true
+          uptime; free -m
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: evidence
+          path: |
+            artifacts/junit.xml
+            artifacts/validate/
+      - name: Tear down
+        if: always()
+        run: make RUN=sudo fabric-down
+
+  trivy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t fabricx-host:1 images/host
+      - name: Scan lab images (report HIGH/CRITICAL)
+        run: |
+          docker pull quay.io/frrouting/frr:10.2.1
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.58.1 image --severity HIGH,CRITICAL --exit-code 0 fabricx-host:1
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.58.1 image --severity HIGH,CRITICAL --exit-code 0 quay.io/frrouting/frr:10.2.1

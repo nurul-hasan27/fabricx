@@ -1,0 +1,50 @@
+- id: REQ-OVERLAY-001
+  title: Same subnet across leaves (L2VNI)
+  requirement: h1 reaches h3 (same subnet, different leaf) through L2VNI 10010.
+  steps: ["ping h1 -> h3", "capture on leaf2 and read the VNI"]
+  pass: ping succeeds; capture shows VNI 10010 between VTEP loopbacks on UDP 4789
+  tests:
+    - tests/lab/test_phase3_overlay.py::test_class1_same_subnet_different_leaf_l2vni
+    - tests/lab/test_phase3_overlay.py::test_pcap_shows_vtep_outer_header_and_vnis
+  evidence: [artifacts/phase3/leaf2-vxlan.txt, docs/packet-walkthrough.md]
+- id: REQ-OVERLAY-002
+  title: Routed traffic uses symmetric IRB (L3VNI)
+  requirement: h1 reaches h4 (different subnet, different leaf) through L3VNI 50001, never the destination L2VNI.
+  steps: ["ping h1 -> h4", "capture and check VNI and TTL"]
+  pass: ping succeeds; VNI 50001 on the wire; VNI 10020 absent
+  tests:
+    - tests/lab/test_phase3_overlay.py::test_class3_different_subnet_different_leaf_symmetric_irb
+    - tests/lab/test_phase3_overlay.py::test_pcap_shows_vtep_outer_header_and_vnis
+  evidence: [artifacts/phase3/leaf2-vxlan.txt]
+- id: REQ-OVERLAY-003
+  title: Local routing
+  requirement: h1 reaches h2 (different subnet, same leaf) through the anycast gateway.
+  steps: ["ping h1 -> h2"]
+  pass: ping succeeds
+  tests: [tests/lab/test_phase3_overlay.py::test_class2_different_subnet_same_leaf_local_routing]
+  evidence: [docs/phases/phase-3-vxlan-evpn-overlay.md]
+- id: REQ-OVERLAY-004
+  title: Tenant isolation
+  requirement: RED hosts cannot reach BLUE hosts in either direction and RED routes do not exist in BLUE's VRF table.
+  steps: ["ping h1 -> h5 and h5 -> h1 (must fail)", "inspect leaf3 BLUE routes"]
+  pass: both pings fail; no 10.10.10.x or 10.20.20.x in BLUE
+  tests:
+    - tests/lab/test_phase3_overlay.py::test_class4_different_vrf_must_fail
+    - tests/lab/test_phase3_overlay.py::test_red_routes_not_leaked_to_blue_vrf_table
+  evidence: [artifacts/phase3/leaf1-vrf-RED-routes.txt]
+- id: REQ-OVERLAY-005
+  title: Anycast gateway
+  requirement: Every leaf uses the same gateway MAC for every VLAN.
+  steps: ["`ip link show br<vlan>` on each leaf"]
+  pass: one unique MAC equal to the inventory value
+  tests: [tests/lab/test_phase3_overlay.py::test_anycast_gateway_mac_identical_on_every_leaf]
+  evidence: [inventory/fabric.yaml]
+- id: REQ-OVERLAY-006
+  title: EVPN route types
+  requirement: Type-2 (MAC+IP) for every host, Type-3 per VNI per VTEP, Type-5 per subnet are present on every leaf.
+  steps: ["`show bgp l2vpn evpn route json` on each leaf"]
+  pass: all expected routes present
+  tests:
+    - tests/lab/test_phase3_overlay.py::test_evpn_route_types_present
+    - tests/unit/test_parsers_validators.py::test_missing_evpn_routes_detected
+  evidence: [artifacts/phase3/leaf1-evpn-routes.json]

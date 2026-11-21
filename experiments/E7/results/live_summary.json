@@ -1,0 +1,22 @@
+{
+ "n": 10,
+ "outage_ms": {
+  "min": 4.068197,
+  "median": 9.4331935,
+  "max": 488.051324
+ },
+ "lost_median": 0.0,
+ "mm_seq_after": [
+  0,
+  0,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1
+ ],
+ "old_leaf_claims_after": 7
+}

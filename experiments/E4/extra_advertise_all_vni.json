@@ -1,0 +1,24 @@
+{
+ "fault": "no advertise-all-vni on leaf2",
+ "symptoms": {
+  "c1": false,
+  "c2": true,
+  "c3": false,
+  "c4": false
+ },
+ "diagnosis": [
+  {
+   "layer": "VNI/VLAN maps",
+   "cause_key": "missing-l3vni",
+   "nodes": [
+    "leaf2"
+   ],
+   "evidence": [
+    "leaf2: EVPN has no L3 VNI 50001 bound to VRF RED (saw None)"
+   ],
+   "probable_cause": "L3VNI 50001 is not mapped to VRF RED on leaf2",
+   "confidence": "high"
+  }
+ ],
+ "consequences": []
+}

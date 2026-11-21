@@ -1,0 +1,9 @@
+{
+ "protocol": "ospf",
+ "bfd": "bfd",
+ "fault": "carrier",
+ "n": 10,
+ "min_ms": 2.812044,
+ "median_ms": 4.395607,
+ "max_ms": 42.29512
+}

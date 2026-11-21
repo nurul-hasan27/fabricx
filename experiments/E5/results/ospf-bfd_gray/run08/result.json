@@ -1,0 +1,16 @@
+{
+ "received": 7301,
+ "sent": 8000,
+ "lost": 699,
+ "longest_gap_ms": 700.070568,
+ "reordered": 0,
+ "duplicates": 0,
+ "profile": "ospf-bfd",
+ "fault": "gray",
+ "run": 8,
+ "uplink": "eth2",
+ "gap_start_after_inject_ms": 6.066873,
+ "inject_ts_ns": 1795198403209766310,
+ "restore_ts_ns": 1795198411430529230,
+ "interval_ms": 1.0
+}

@@ -1,0 +1,22 @@
+{
+ "scenario": "remote",
+ "bad_links": [
+  [
+   "spine2",
+   "eth2"
+  ],
+  [
+   "leaf2",
+   "eth2"
+  ]
+ ],
+ "icmp_blocked_on": null,
+ "evidence_ping_1430": "PING 10.10.10.103 (10.10.10.103) 1430(1458) bytes of data.\nFrom 10.10.10.103 icmp_seq=2 Frag needed and DF set (mtu = 1450)\n\n--- 10.10.10.103 ping statistics ---\n2 packets transmitted, 0 received, +1 errors, 100% packet loss, time 1015ms",
+ "max_df_payload": 1422,
+ "expected_threshold": 1422,
+ "iperf": {
+  "bits_per_second": 5232874587.826905,
+  "retransmits": 11203,
+  "error": null
+ }
+}
