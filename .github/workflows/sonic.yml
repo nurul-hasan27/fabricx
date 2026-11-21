@@ -1,0 +1,41 @@
+name: sonic
+# Manual only: downloads ~1 GB. Run with `gh workflow run sonic.yml -f mode=probe`.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: probe | fabric
+        default: probe
+jobs:
+  sonic:
+    runs-on: ubuntu-latest   # x86_64; SONiC-VS has no arm64 build
+    timeout-minutes: 45
+    env:
+      FABRICX_EXEC: sudo
+    steps:
+      - uses: actions/checkout@v4
+      - name: Free disk space
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL && df -h /
+      - name: Install Containerlab 0.83.0
+        run: |
+          curl -sLO https://github.com/srl-labs/containerlab/releases/download/v0.83.0/containerlab_0.83.0_linux_amd64.deb
+          sudo dpkg -i containerlab_0.83.0_linux_amd64.deb
+      - name: Get pinned SONiC-VS image
+        run: scripts/sonic_image.sh | tee sonic-image.txt
+      - name: Probe
+        if: inputs.mode == 'probe'
+        run: |
+          sudo containerlab deploy -t labs/sonic-probe/probe.clab.yml
+          for i in $(seq 1 30); do sudo docker exec clab-sprobe-sonic sonic-db-cli APPL_DB keys 'PORT_TABLE:*' 2>/dev/null | grep -q Ethernet && break; sleep 10; done
+          sleep 30
+          scripts/sonic_probe.sh clab-sprobe-sonic | tee sonic-probe.txt
+          sudo docker stats --no-stream --format '{{.Name}} {{.MemUsage}}' | tee -a sonic-probe.txt
+          df -h / | tee -a sonic-probe.txt
+          sudo containerlab destroy -t labs/sonic-probe/probe.clab.yml --cleanup
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sonic-${{ inputs.mode }}
+          path: |
+            sonic-*.txt
+            artifacts/sonic/

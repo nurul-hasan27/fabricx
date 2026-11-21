@@ -1,0 +1,13 @@
+# Phase 7 probe: one SONiC-VS node cabled to one FRR node. Only used to learn what the image contains.
+name: sprobe
+topology:
+  nodes:
+    sonic:
+      kind: sonic-vs
+      image: docker-sonic-vs:202505-1238524
+    frr:
+      kind: linux
+      image: quay.io/frrouting/frr:10.2.1
+  links:
+    - endpoints: ["sonic:eth1", "frr:eth1"]
+    - endpoints: ["sonic:eth2", "frr:eth2"]
