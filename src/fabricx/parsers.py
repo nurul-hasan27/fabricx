@@ -57,3 +57,20 @@ def evpn_counts(keys: list[str]) -> dict[str, int]:
         elif t == 5:
             c["type5"] += 1
     return c
+
+
+def tc_child_qdisc_stats(txt: str, handle: str = "10:") -> dict[str, int]:
+    """`tc -s qdisc show` -> counters of the child queue under a shaper (E6): sent packets, drops and, for
+    RED, ECN marks / early drops / pdrops. Only the child's block is read, never the shaper's."""
+    m = re.search(rf"qdisc \w+ {re.escape(handle)}.*?(?=\nqdisc |\Z)", txt, re.S)
+    if not m:
+        raise ValueError(f"queue {handle} not found in tc output")
+    block = m.group(0)
+
+    def num(rx: str) -> int:
+        f = re.search(rx, block)
+        return int(f.group(1)) if f else 0
+    out = {"sent_pkts": num(r"Sent \d+ bytes (\d+) pkt"), "dropped": num(r"dropped (\d+)")}
+    if "marked" in block:
+        out |= {"marked": num(r"marked (\d+)"), "early_drop": num(r"early (\d+)"), "pdrop": num(r"pdrop (\d+)")}
+    return out

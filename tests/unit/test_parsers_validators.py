@@ -98,3 +98,12 @@ def test_unreachable_node_reported_and_does_not_crash_other_checks():
     found = validators.validate(F, st)
     assert [x.check for x in found if x.node == "leaf2"] == ["node-unreachable"]
     assert all(x.check in ("node-unreachable", "bgp-peer-missing") or x.node != "leaf2" for x in found)
+
+
+def test_tc_child_queue_counters_not_the_shapers():
+    """E6 numbers come from the child queue under the TBF shaper (format captured from the lab)."""
+    from fabricx import parsers
+    red = parsers.tc_child_qdisc_stats(open("tests/fixtures/leaf2_tc_tbf_red.txt").read())
+    assert red == {"sent_pkts": 49168, "dropped": 2, "marked": 1280, "early_drop": 1, "pdrop": 1}
+    fifo = parsers.tc_child_qdisc_stats(open("tests/fixtures/leaf2_tc_tbf_pfifo.txt").read())
+    assert fifo == {"sent_pkts": 49817, "dropped": 5}   # 5 = the pfifo's drops, not the tbf's 7

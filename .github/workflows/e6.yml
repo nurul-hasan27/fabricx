@@ -1,0 +1,45 @@
+name: e6
+# Manual: E6 incast study on x86 (DCTCP needs the host kernel's tcp_dctcp module, which the Mac's VM lacks).
+# Run with `gh workflow run e6.yml -f runs=5`.
+on:
+  workflow_dispatch:
+    inputs:
+      runs:
+        description: runs per scenario
+        default: "5"
+jobs:
+  e6:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      FABRICX_EXEC: sudo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - name: Kernel support (recorded)
+        run: |
+          mkdir -p experiments/E6/results
+          { uname -r; sudo modprobe tcp_dctcp && echo "tcp_dctcp loaded"; for m in sch_tbf sch_red; do sudo modprobe $m && echo "$m ok"; done
+            sysctl net.ipv4.tcp_available_congestion_control; nproc; free -m; } 2>&1 | tee experiments/E6/results/runner.txt
+      - name: Install Containerlab 0.83.0, venv, host image
+        run: |
+          curl -sLO https://github.com/srl-labs/containerlab/releases/download/v0.83.0/containerlab_0.83.0_linux_amd64.deb
+          sudo dpkg -i containerlab_0.83.0_linux_amd64.deb
+          python -m venv .venv && .venv/bin/pip install -q -e .
+          sudo docker build -q -t fabricx-host:1 images/host
+      - name: Deploy the E6 variant (adds h6)
+        run: |
+          .venv/bin/fabricx deploy --inventory inventory/variants/e6-incast.yaml | tail -3
+          sleep 60
+          .venv/bin/fabricx validate --inventory inventory/variants/e6-incast.yaml --out artifacts/e6-validate | tee experiments/E6/results/validate.txt
+      - name: E6 scenarios A (tail-drop), B (RED+ECN cubic), C (RED+ECN DCTCP)
+        run: .venv/bin/python experiments/E6/run.py A,B,C ${{ inputs.runs }} 2>&1 | tee experiments/E6/results/run.log
+      - name: Tear down
+        if: always()
+        run: sudo containerlab destroy -t generated/fabricx.clab.yml --cleanup || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e6-results
+          path: experiments/E6/results/
