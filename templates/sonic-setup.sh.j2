@@ -3,7 +3,8 @@
 # SONiC is configured through its databases: ports, IPs and the loopback go into CONFIG_DB, the
 # *mgrd daemons turn them into kernel/ASIC state; then FRR (bgpd, bfdd) is started and given its config.
 set -u
-log() { echo "[sonic-setup] $*"; }
+exec > >(tee -a /var/log/sonic-setup.log) 2>&1   # full log stays in the container
+log() { echo "[sonic-setup] $(date +%T) $*"; }
 
 # 1. wait until the ports exist (portsyncd writes PortInitDone when port init is finished)
 for i in $(seq 1 120); do
@@ -32,7 +33,8 @@ done
 log "addresses on kernel interfaces: ok=$ok"
 
 # 4. FRR: zebra already runs (with the FPM module to fpmsyncd); start bgpd{{ ' and bfdd' if u.bfd_enabled }}, then apply config
-supervisorctl start bgpd >/dev/null
+supervisorctl start bgpd
+sleep 2; supervisorctl status bgpd
 {% if u.bfd_enabled %}
 # bfdd ships in the image but SONiC-VS has no supervisor entry for it: run it like supervisord runs the
 # other FRR daemons (foreground, vty on 127.0.0.1), detached, with its own log.
@@ -47,3 +49,4 @@ sleep 2; pgrep -x bfdd >/dev/null && log "bfdd running" || { log "bfdd NOT runni
 for i in $(seq 1 30); do vtysh -c 'show bgp summary' >/dev/null 2>&1 && break; sleep 1; done
 vtysh -f /etc/fabricx/frr.conf
 log "FRR configured"
+sleep 3; supervisorctl status bgpd; pgrep -a bgpd || log "bgpd NOT running after config"

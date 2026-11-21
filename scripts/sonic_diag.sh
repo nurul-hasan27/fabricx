@@ -4,6 +4,8 @@ S=clab-fabricx-$1; P=clab-fabricx-$2; PIP=$3; PIF=$4
 x() { local c=$1; shift; echo; echo "### ${c#clab-fabricx-}: $*"; sudo docker exec "$c" bash -c "$*" 2>&1 | head -${N:-40}; }
 x $S "vtysh -c 'show bgp summary' | sed -n '1,14p'"
 x $S "supervisorctl status | grep -E 'bgpd|zebra|bfdd|staticd'; ps -eo args | grep -E '/usr/lib/frr/' | grep -v grep"
+N=80 x $S "cat /var/log/sonic-setup.log"
+N=40 x $S "grep -i -E 'bgpd|bfdd|zebra' /var/log/syslog | grep -v -i 'rsyslog' | tail -40; ls -la /var/log/frr 2>/dev/null; tail -20 /var/log/frr/bgpd.log 2>/dev/null; ls /var/crash /tmp 2>/dev/null | head"
 x $S "grep -B1 -A3 'program:bgpd' /etc/supervisor/conf.d/supervisord.conf"
 x $S "ip -br link | grep -E '^(eth|Ethernet0 |Ethernet4 |Loopback)'; ip -br addr | grep -E '^(Ethernet0 |Ethernet4 |Loopback)'"
 x $S "show interfaces status | head -4"
