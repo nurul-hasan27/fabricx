@@ -7,3 +7,27 @@ set -e
 for i in $(seq 60); do ip link show br30 >/dev/null 2>&1 && break; sleep 0.5; done
 ip link set eth3 master br30
 ip link set eth3 up
+
+# --- L3VNI check-and-repair (workaround for an FRR start-up race, seen on CI) ---------------------------
+# If bgpd gets zebra's L3VNI announcement before it has learned the VRF's id, it creates a second, automatic
+# BGP instance that owns the L3VNI, and the configured instance never originates Type-5 routes. Reproduced
+# on purpose by configuring 'vrf X / vni N' before 'router bgp ... vrf X'. Check = this leaf originates a
+# Type-5 for each of its subnets; repair = withdraw and re-add the L3VNI (the empty automatic instance stays
+# behind, harmless). Logged in /var/log/fabricx-heal.log so CI can count how often it fires.
+t5() { vtysh -c 'show bgp l2vpn evpn route type prefix self-originate' 2>/dev/null; }
+have_all() {
+  t5 | grep -qF '[24]:[10.30.30.0]' || return 1
+  return 0
+}
+for i in $(seq 1 20); do have_all && break; sleep 1; done
+if have_all; then
+  echo "[fabricx-heal] leaf3: own Type-5 routes present after ~${i} s" >> /var/log/fabricx-heal.log
+else
+  echo "[fabricx-heal] leaf3: own Type-5 missing after 20 s -> re-adding L3VNI(s)" | tee -a /var/log/fabricx-heal.log
+  vtysh -c 'configure terminal' -c 'vrf BLUE' -c 'no vni 50002' -c 'exit-vrf'
+  sleep 2
+  vtysh -c 'configure terminal' -c 'vrf BLUE' -c 'vni 50002' -c 'exit-vrf'
+  for i in $(seq 1 20); do have_all && break; sleep 1; done
+  have_all && r=repaired || r="STILL MISSING"
+  echo "[fabricx-heal] leaf3: after re-adding L3VNI(s): $r" | tee -a /var/log/fabricx-heal.log
+fi

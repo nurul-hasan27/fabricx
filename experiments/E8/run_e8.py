@@ -78,7 +78,8 @@ def write(name: str, text: str) -> None:
 
 def hset(key: str, fields: dict[str, str]) -> None:
     args = " ".join(f"{k} {v}" for k, v in fields.items())
-    r = node_exec(LAB, SW, f"sonic-db-cli CONFIG_DB HSET '{key}' {args}", timeout=30)
+    # redis-cli, not sonic-db-cli: sonic-db-cli parses a value like '-3' as a command-line option.
+    r = node_exec(LAB, SW, f"redis-cli -n 4 HSET '{key}' {args}", timeout=30)   # CONFIG_DB = Redis DB 4
     assert r.returncode == 0, r.stdout + r.stderr
 
 

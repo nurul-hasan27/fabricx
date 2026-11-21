@@ -38,7 +38,8 @@ def render_all(f: Fabric, routing: bool = True) -> dict[str, str]:
                 f=f, sw=sw, vlans=f.leaf_vlans(sw.name), vrfs=f.leaf_vrfs(sw.name),
                 ports=[hl for hl in f.host_links() if hl.leaf == sw.name])
             files[f"{d}/ports.sh"] = env.get_template("leaf-ports.sh.j2").render(
-                f=f, sw=sw, ports=[hl for hl in f.host_links() if hl.leaf == sw.name])
+                f=f, sw=sw, ports=[hl for hl in f.host_links() if hl.leaf == sw.name],
+                vrfs=f.leaf_vrfs(sw.name), vlans=f.leaf_vlans(sw.name))
         files[f"{d}/vtysh.conf"] = env.get_template("vtysh.conf.j2").render()
     return files
 

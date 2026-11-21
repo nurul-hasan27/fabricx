@@ -45,6 +45,9 @@ jobs:
           .venv/bin/pytest tests -v --timeout=400 -m "not resilience" --junitxml=artifacts/junit.xml
           .venv/bin/fabricx validate
           .venv/bin/fabricx drift
+      - name: L3VNI check-and-repair log (did the start-up workaround fire?)
+        if: always()
+        run: for n in leaf1 leaf2 leaf3; do sudo docker exec clab-fabricx-$n cat /var/log/fabricx-heal.log 2>/dev/null; done | tee artifacts/heal.log
       - name: Diagnostics on failure
         if: failure()
         run: |
@@ -60,6 +63,7 @@ jobs:
           name: evidence
           path: |
             artifacts/junit.xml
+            artifacts/heal.log
             artifacts/validate/
       - name: Tear down
         if: always()
