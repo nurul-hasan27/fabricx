@@ -84,13 +84,21 @@ def one_run(scen: str) -> dict:
     loaded = ping_rtts(ex("h1", f"ping -Q 2 -c {(RUN_S - 6) * 20} -i 0.05 {H[RECV].ip}", timeout=RUN_S + 30))
     res = {s: json.loads(p.communicate(timeout=RUN_S + 60)[0]) for s, p in procs.items()}
     q = qstats()
-    thr = {s: r["end"]["sum_received"]["bits_per_second"] / 1e6 for s, r in res.items()}
-    tot = sum(thr.values())
-    jain = tot ** 2 / (len(thr) * sum(x * x for x in thr.values()))
+    # Per sender: bytes the receiver got, and when that sender's test started / how long it ran.
+    raw = {s: {"start": r["start"]["timestamp"]["timesecs"], "seconds": r["end"]["sum_received"]["seconds"],
+               "bytes": r["end"]["sum_received"]["bytes"]} for s, r in res.items()}
+    thr = {s: v["bytes"] * 8 / v["seconds"] / 1e6 for s, v in raw.items()}
+    # Total over the COMMON span: summing per-sender averages over-counts when one sender starts late and then
+    # runs alone (first version reported 114.5 Mbit/s through a 100 Mbit/s shaper).
+    span = max(v["start"] + v["seconds"] for v in raw.values()) - min(v["start"] for v in raw.values())
+    tot = sum(v["bytes"] for v in raw.values()) * 8 / span / 1e6
+    skew = max(v["start"] for v in raw.values()) - min(v["start"] for v in raw.values())
+    jain = sum(thr.values()) ** 2 / (len(thr) * sum(x * x for x in thr.values()))
     tcp_rtt = [st["sender"]["mean_rtt"] / 1000 for r in res.values() for st in r["end"]["streams"]
                if "mean_rtt" in st.get("sender", {})]
     return {"scenario": scen, "throughput_mbps": {s: round(v, 2) for s, v in thr.items()},
-            "total_mbps": round(tot, 2), "jain": round(jain, 3),
+            "total_mbps": round(tot, 2), "span_s": round(span, 2), "start_skew_s": skew,
+            "jain": round(jain, 3), "per_sender_raw": raw,
             "retransmits": sum(r["end"]["sum_sent"].get("retransmits", 0) for r in res.values()),
             "queue": q, "rtt_idle_ms_median": round(statistics.median(idle), 3),
             "rtt_loaded_ms": {"n": len(loaded), "median": round(statistics.median(loaded), 2),
@@ -118,7 +126,7 @@ def main() -> None:
         for i in range(runs):
             r = one_run(s)
             rows.append(r)
-            print(f"{s} run {i + 1}: total {r['total_mbps']} Mbit/s, jain {r['jain']}, drops {r['queue']['dropped']}, "
+            print(f"{s} run {i + 1}: total {r['total_mbps']} Mbit/s (span {r['span_s']} s, start skew {r['start_skew_s']} s), jain {r['jain']}, drops {r['queue']['dropped']}, "
                   f"marks {r['queue'].get('marked', '-')}, rtt med/p99 {r['rtt_loaded_ms'].get('median')}/"
                   f"{r['rtt_loaded_ms'].get('p99')} ms (idle {r['rtt_idle_ms_median']}), ping loss {r['ping_loss_pct']}%, "
                   f"tcp rtt {r['tcp_mean_rtt_ms']} ms, retrans {r['retransmits']}")
