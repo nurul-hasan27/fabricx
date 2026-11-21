@@ -211,3 +211,11 @@ def sonic_trace(prefix: str, node: str = "leaf3", lab: str = "fabricx",
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(sonic.render_trace(prefix, hops))
     typer.echo(f"wrote {out}")
+
+
+@app.command()
+def exporter(port: int = 9101, inventory: Path = INV) -> None:
+    """Serve fabric metrics for Prometheus at http://<host>:<port>/metrics (switches are polled on each scrape)."""
+    from . import exporter as ex
+    typer.echo(f"fabricx exporter on :{port}/metrics, collecting on each scrape")
+    ex.serve(model.load(inventory), port)

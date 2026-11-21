@@ -1,0 +1,9 @@
+# Prometheus for the FabricX lab: scrapes the fabricx exporter (`fabricx exporter`) every 5 s.
+# 'exporter' is mapped to the machine running the exporter by scripts/monitoring.sh (--add-host).
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+scrape_configs:
+  - job_name: fabricx
+    static_configs:
+      - targets: ["exporter:9101"]

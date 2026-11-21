@@ -10,7 +10,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .. import collectors, diagnose, model, validators
+from .. import annotate, collectors, diagnose, model, validators
 from ..runner import PREFIX, node_exec
 from .catalogue import Fault
 
@@ -38,6 +38,7 @@ def traffic_classes(f: model.Fabric) -> dict[str, bool]:
 def inject(f: model.Fabric, fault: Fault) -> dict:
     ts = now()
     state = fault.inject(f)
+    annotate.post(f"inject {fault.id}: {fault.name}", ["inject", fault.id])
     ACTIVE.parent.mkdir(parents=True, exist_ok=True)
     ACTIVE.write_text(json.dumps({"id": fault.id, "state": state, "ts": ts}))
     return state
@@ -47,6 +48,7 @@ def restore(f: model.Fabric, fault: Fault, state: dict | None = None) -> None:
     if state is None and ACTIVE.exists():
         state = json.loads(ACTIVE.read_text()).get("state", {})
     fault.restore(f, state or {})
+    annotate.post(f"restore {fault.id}: {fault.name}", ["restore", fault.id])
     ACTIVE.unlink(missing_ok=True)
 
 
