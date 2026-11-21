@@ -32,15 +32,19 @@ for i in $(seq 1 60); do
 done
 log "addresses on kernel interfaces: ok=$ok"
 
-# 4. FRR: zebra already runs (with the FPM module to fpmsyncd); start bgpd{{ ' and bfdd' if u.bfd_enabled }}, then apply config
+# 4. FRR. Wait for the image's own boot script (start.sh) to finish: it creates /var/run/frr and starts
+#    zebra (with the FPM module to fpmsyncd). Starting bgpd before that made it exit (seen on CI).
+for i in $(seq 1 120); do
+  supervisorctl status start.sh 2>/dev/null | grep -q EXITED && supervisorctl status zebra | grep -q RUNNING && break
+  sleep 1
+done
+log "image boot finished (start.sh exited, zebra running) after ~${i} s more"
 supervisorctl start bgpd
 sleep 2; supervisorctl status bgpd
 {% if u.bfd_enabled %}
+[ -d /var/run/frr ] || log "WARNING: /var/run/frr missing (FRR daemons drop to user frr and cannot create it)"
 # bfdd ships in the image but SONiC-VS has no supervisor entry for it: run it like supervisord runs the
 # other FRR daemons (foreground, vty on 127.0.0.1), detached, with its own log.
-# FRR drops to the 'frr' user before creating its run directory, and SONiC-VS never creates it for bfdd
-# (seen on CI: "failed to mkdir /var/run/frr: Permission denied"), so create it first.
-mkdir -p /var/run/frr && chown frr:frr /var/run/frr 2>/dev/null || chmod 777 /var/run/frr
 if ! pgrep -x bfdd >/dev/null; then
   nohup /usr/lib/frr/bfdd -A 127.0.0.1 >/var/log/bfdd.log 2>&1 &
 fi
