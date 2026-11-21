@@ -36,6 +36,9 @@ supervisorctl start bgpd >/dev/null
 {% if u.bfd_enabled %}
 # bfdd ships in the image but SONiC-VS has no supervisor entry for it: run it like supervisord runs the
 # other FRR daemons (foreground, vty on 127.0.0.1), detached, with its own log.
+# FRR drops to the 'frr' user before creating its run directory, and SONiC-VS never creates it for bfdd
+# (seen on CI: "failed to mkdir /var/run/frr: Permission denied"), so create it first.
+mkdir -p /var/run/frr && chown frr:frr /var/run/frr 2>/dev/null || chmod 777 /var/run/frr
 if ! pgrep -x bfdd >/dev/null; then
   nohup /usr/lib/frr/bfdd -A 127.0.0.1 >/var/log/bfdd.log 2>&1 &
 fi

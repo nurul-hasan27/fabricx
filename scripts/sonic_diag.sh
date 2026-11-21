@@ -13,6 +13,7 @@ x $S "ping -c2 -W1 $PIP; ip neigh"
 x $P "ip -br link show $PIF; ip -br addr show $PIF; ip neigh"
 N=25 x $P "vtysh -c 'show bgp neighbors' | grep -A22 'BGP neighbor is ${PIP%.*}.$(( ${PIP##*.} + 1 ))' | grep -i -E 'state|reset|bfd|connect|timer|error'"
 x $P "vtysh -c 'show bfd peers brief'"
+x $S "ls -ld /var/run/frr; ls /var/run/frr | head; id frr"
 x $S "vtysh -c 'show bfd peers brief'; cat /var/log/bfdd.log | tail -5; ss -ltn | grep -E ':179|:3784'"
 echo; echo "### capture 6 s on both ends while leaf pings"
 sudo timeout 15 nsenter -t $(sudo docker inspect -f '{{.State.Pid}}' $S) -n tcpdump -c 12 -nn -i eth1 'tcp port 179 or udp port 3784 or icmp' 2>&1 | head -12 &
