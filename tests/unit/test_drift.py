@@ -27,3 +27,10 @@ def test_line_moved_to_other_block_detected():
         " address-family l2vpn evpn\n  neighbor FABRIC activate", " address-family l2vpn evpn\n  maximum-paths 2\n  neighbor FABRIC activate", 1)
     missing, extra = drift.diff(GEN, moved)
     assert missing and extra
+
+
+def test_sonic_image_zebra_lines_are_not_drift_on_sonic_nodes_only():
+    gen = "router bgp 65003\n bgp router-id 10.0.0.13\nexit\n"
+    run = gen + "fpm address 127.0.0.1\nzebra nexthop-group keep 1\n"
+    assert drift.diff(gen, run, nos="sonic-vs") == ([], [])
+    assert drift.diff(gen, run)[1] == ["fpm address 127.0.0.1", "zebra nexthop-group keep 1"]

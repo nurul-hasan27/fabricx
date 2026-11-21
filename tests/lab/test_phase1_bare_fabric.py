@@ -21,6 +21,8 @@ def test_link_up_with_mtu_and_pingable_both_ways(lk):
     for node, ifname, peer in ((lk.spine, lk.spine_if, lk.leaf_ip), (lk.leaf, lk.leaf_if, lk.spine_ip)):
         r = node_exec(LAB, node, f"ip -o link show {ifname}")
         assert "state UP" in r.stdout or "UP," in r.stdout, r.stdout
+        rif = F.routed_if(node, ifname)   # SONiC: MTU belongs to the port (Ethernet0), not the wire under it
+        r = node_exec(LAB, node, f"ip -o link show {rif}")
         assert f"mtu {F.fabric_mtu}" in r.stdout, r.stdout
         p = node_exec(LAB, node, f"ping -c 2 -W 2 {peer}")
         assert p.returncode == 0, p.stdout + p.stderr
@@ -28,7 +30,7 @@ def test_link_up_with_mtu_and_pingable_both_ways(lk):
 
 @pytest.mark.parametrize("sw", F.spines + F.leaves, ids=lambda s: s.name)
 def test_loopback_configured(sw):
-    r = node_exec(LAB, sw.name, "ip -o addr show dev lo")
+    r = node_exec(LAB, sw.name, f"ip -o addr show dev {F.loopback_if(sw.name)}")
     assert f"{sw.loopback}/32" in r.stdout, r.stdout
 
 

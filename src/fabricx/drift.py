@@ -15,9 +15,15 @@ IGNORE = {
     "detect-multiplier 3", "receive-interval 300", "transmit-interval 300",
 }
 IGNORE_RE = re.compile(r"^(frr version .*|exit.*)$")
+# Lines the SONiC-VS image's own zebra config adds (FPM to fpmsyncd, next-hop handling). Seen on CI with
+# 202505 build 1238524. They belong to the image, not to our inventory, so they are not drift.
+SONIC_IGNORE = {
+    "fpm address 127.0.0.1", "no fpm use-next-hop-groups", "ip nht resolve-via-default",
+    "ipv6 nht resolve-via-default", "no zebra nexthop kernel enable", "zebra nexthop-group keep 1",
+}
 
 
-def normalize(text: str) -> set[str]:
+def normalize(text: str, extra_ignore: frozenset[str] = frozenset()) -> set[str]:
     out: set[str] = set()
     stack: list[tuple[int, str]] = []
     for raw in text.splitlines():
@@ -25,7 +31,7 @@ def normalize(text: str) -> set[str]:
             continue
         indent = len(raw) - len(raw.lstrip())
         line = raw.strip()
-        if line in IGNORE or IGNORE_RE.match(line):
+        if line in IGNORE or line in extra_ignore or IGNORE_RE.match(line):
             continue
         while stack and stack[-1][0] >= indent:
             stack.pop()
@@ -34,9 +40,10 @@ def normalize(text: str) -> set[str]:
     return out
 
 
-def diff(generated: str, running: str) -> tuple[list[str], list[str]]:
+def diff(generated: str, running: str, nos: str = "frr") -> tuple[list[str], list[str]]:
     """(missing_from_running, extra_in_running). Parent lines that only exist as context are not reported twice."""
-    g, r = normalize(generated), normalize(running)
+    extra = frozenset(SONIC_IGNORE) if nos == "sonic-vs" else frozenset()
+    g, r = normalize(generated, extra), normalize(running, extra)
 
     def leaves(s: set[str]) -> set[str]:
         return {x for x in s if not any(y.startswith(x + " > ") for y in s)}

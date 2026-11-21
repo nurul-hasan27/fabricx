@@ -1,4 +1,5 @@
 """fabricx command line."""
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -7,6 +8,9 @@ import typer
 from . import collectors, diagram, generate, model, report, runner, validators
 from . import drift as driftmod
 from . import trace as tracemod
+
+# Same default as model.load(): $FABRICX_INVENTORY, else the main inventory.
+INV = Path(os.environ.get("FABRICX_INVENTORY", "inventory/fabric.yaml"))
 
 app = typer.Typer(help="FabricX fabric lab tool", no_args_is_help=True)
 
@@ -17,7 +21,7 @@ def main() -> None:
 
 
 @app.command("generate")
-def gen(inventory: Path = Path("inventory/fabric.yaml"), out: Path = Path("generated"),
+def gen(inventory: Path = INV, out: Path = Path("generated"),
         routing: bool = True) -> None:
     """Generate containerlab topology and node configs from the inventory."""
     f = model.load(inventory)
@@ -27,7 +31,7 @@ def gen(inventory: Path = Path("inventory/fabric.yaml"), out: Path = Path("gener
 
 
 @app.command()
-def validate(inventory: Path = Path("inventory/fabric.yaml"), out: Path = Path("artifacts/validate")) -> None:
+def validate(inventory: Path = INV, out: Path = Path("artifacts/validate")) -> None:
     """Collect live state, compare with the inventory's intent, write a report. Exit 1 on findings."""
     f = model.load(inventory)
     run_dir = out / datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M-%SZ")
@@ -42,7 +46,7 @@ def validate(inventory: Path = Path("inventory/fabric.yaml"), out: Path = Path("
 
 
 @app.command()
-def deploy(inventory: Path = Path("inventory/fabric.yaml"), out: Path = Path("generated")) -> None:
+def deploy(inventory: Path = INV, out: Path = Path("generated")) -> None:
     """Generate, then deploy the lab with Containerlab."""
     gen(inventory, out)
     r = runner.sh(f"containerlab deploy -t {out.resolve()}/{model.load(inventory).name}.clab.yml", timeout=600)
@@ -51,7 +55,7 @@ def deploy(inventory: Path = Path("inventory/fabric.yaml"), out: Path = Path("ge
 
 
 @app.command()
-def destroy(inventory: Path = Path("inventory/fabric.yaml"), out: Path = Path("generated")) -> None:
+def destroy(inventory: Path = INV, out: Path = Path("generated")) -> None:
     """Destroy the lab."""
     name = model.load(inventory).name
     r = runner.sh(f"containerlab destroy -t {out.resolve()}/{name}.clab.yml --cleanup", timeout=300)
@@ -60,7 +64,7 @@ def destroy(inventory: Path = Path("inventory/fabric.yaml"), out: Path = Path("g
 
 
 @app.command()
-def drift(inventory: Path = Path("inventory/fabric.yaml")) -> None:
+def drift(inventory: Path = INV) -> None:
     """Compare each switch's running FRR config with what the inventory would generate. Exit 1 on drift."""
     f = model.load(inventory)
     files = generate.render_all(f)
@@ -72,7 +76,7 @@ def drift(inventory: Path = Path("inventory/fabric.yaml")) -> None:
             typer.echo(f"UNREACHABLE {sw.name}: {exc.reason}")
             bad += 1
             continue
-        missing, extra = driftmod.diff(files[f"configs/{sw.name}/frr.conf"], r.stdout)
+        missing, extra = driftmod.diff(files[f"configs/{sw.name}/frr.conf"], r.stdout, nos=sw.nos)
         for m in missing:
             typer.echo(f"DRIFT {sw.name}: missing from running config: {m}")
         for e in extra:
@@ -110,7 +114,7 @@ def faults() -> None:
 
 
 @app.command()
-def inject(fault_id: str, inventory: Path = Path("inventory/fabric.yaml")) -> None:
+def inject(fault_id: str, inventory: Path = INV) -> None:
     """Inject a fault (lab containers only). Remember it with `fabricx restore`."""
     from .faults import get
     from .faults import runner as fr
@@ -120,7 +124,7 @@ def inject(fault_id: str, inventory: Path = Path("inventory/fabric.yaml")) -> No
 
 
 @app.command()
-def restore(inventory: Path = Path("inventory/fabric.yaml")) -> None:
+def restore(inventory: Path = INV) -> None:
     """Undo the active fault."""
     import json as _json
 
@@ -135,7 +139,7 @@ def restore(inventory: Path = Path("inventory/fabric.yaml")) -> None:
 
 
 @app.command()
-def diagnose(inventory: Path = Path("inventory/fabric.yaml")) -> None:
+def diagnose(inventory: Path = INV) -> None:
     """Layered, bottom-up diagnosis from live state. Exit 1 if a problem is found."""
     from . import diagnose as dg
     d, _ = dg.diagnose(model.load(inventory))
@@ -144,7 +148,7 @@ def diagnose(inventory: Path = Path("inventory/fabric.yaml")) -> None:
 
 
 @app.command("run-fault")
-def run_fault_cmd(fault_id: str, probe_seconds: int = 0, inventory: Path = Path("inventory/fabric.yaml")) -> None:
+def run_fault_cmd(fault_id: str, probe_seconds: int = 0, inventory: Path = INV) -> None:
     """Full fault run with evidence bundle: baseline, inject, observe, diagnose, restore, re-check."""
     import json as _json
 
@@ -156,7 +160,7 @@ def run_fault_cmd(fault_id: str, probe_seconds: int = 0, inventory: Path = Path(
 
 @app.command()
 def drill(seed: int = 1, out: Path = Path("experiments/E9/results"), only: str = "",
-          inventory: Path = Path("inventory/fabric.yaml")) -> None:
+          inventory: Path = INV) -> None:
     """Blind drill: inject every catalogue fault in a random (seeded) order; diagnose never sees which one."""
     import json as _json
     import random

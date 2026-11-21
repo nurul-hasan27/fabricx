@@ -200,6 +200,10 @@ class Fabric(BaseModel):
         SONiC sizes it 22 bytes larger than the port MTU (seen on CI: eth1 9122 for Ethernet0 9100)."""
         return sonic_port(ifname) if self.switch(node).nos == "sonic-vs" else ifname
 
+    def loopback_if(self, node: str) -> str:
+        """FRR nodes keep the loopback /32 on 'lo'; SONiC puts it on 'Loopback0' (from CONFIG_DB)."""
+        return "Loopback0" if self.switch(node).nos == "sonic-vs" else "lo"
+
     def link_peers(self, name: str) -> list[LinkPeer]:
         res = []
         for lk in self.fabric_links():

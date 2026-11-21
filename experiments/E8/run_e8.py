@@ -113,7 +113,7 @@ def qos_stages() -> None:
          + [(f"PFC_WD|{p}", {"action": "drop", "detection_time": "200", "restoration_time": "200"})
             for p in ports]),
     ]
-    mark = node_exec(LAB, SW, "wc -l < /var/log/syslog").stdout.strip() or "0"
+    mark = node_exec(LAB, SW, "sh -c 'wc -l < /var/log/syslog'").stdout.strip() or "0"
     for name, writes in stages:
         for key, fields in writes:
             hset(key, fields)
@@ -123,7 +123,7 @@ def qos_stages() -> None:
         write(f"qos_{name}_audit.txt", qos_lossless.render(qos_lossless.audit(cdb)) + "\n")
         errs = node_exec(LAB, SW, f"sh -c \"tail -n +{int(mark) + 1} /var/log/syslog | grep -E 'ERR|WARN' "
                                   f"| grep -E 'orchagent|syncd|buffermgrd' | tail -20\"").stdout
-        mark = node_exec(LAB, SW, "wc -l < /var/log/syslog").stdout.strip() or mark
+        mark = node_exec(LAB, SW, "sh -c 'wc -l < /var/log/syslog'").stdout.strip() or mark
         write(f"qos_{name}_asic.json", json.dumps({"asic": asic_qos_evidence(ports[0]),
                                                    "orchagent_syncd_errors_or_warnings": errs.splitlines()},
                                                   indent=1))

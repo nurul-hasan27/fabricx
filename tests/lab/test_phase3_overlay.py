@@ -37,9 +37,14 @@ def test_class3_different_subnet_different_leaf_symmetric_irb():  # h1 -> h4
     assert ping("h1", H["h4"].ip)
 
 
-def test_class4_different_vrf_must_fail():  # h1 -> h5 and back
-    assert not ping("h1", H["h5"].ip, 1)
-    assert not ping("h5", H["h1"].ip, 1)
+def test_class4_different_vrf_must_fail():  # h1 -> a host in another VRF, and back
+    a = F.hosts[0]
+    other = [h for h in F.hosts if F.vlan(h.vlan).vrf != F.vlan(a.vlan).vrf]
+    if not other:
+        pytest.skip("this inventory has hosts in one VRF only (e.g. the sonic-leaf3 variant)")
+    b = other[0]
+    assert not ping(a.name, b.ip, 1)
+    assert not ping(b.name, a.ip, 1)
 
 
 def test_gateway_reachable_from_every_host():
