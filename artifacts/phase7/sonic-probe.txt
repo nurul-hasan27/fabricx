@@ -1,0 +1,210 @@
+
+### cat /etc/sonic/sonic_version.yml
+---
+build_version: ''
+asic_type: vs
+commit_id: 'ff3c0c9f6'
+branch: '202505'
+release: 'none'
+build_date: Sun Oct  4 13:21:47 UTC 2026
+build_number: 1238524
+built_by: azureuser@952c7ec4c000000
+sonic_os_version: 12
+secure_boot_image: 'no'
+
+### supervisorctl status
+arp_update                       STOPPED   Not started
+bgpd                             STOPPED   Not started
+buffermgrd                       RUNNING   pid 488, uptime 0:00:16
+coppmgrd                         RUNNING   pid 283, uptime 0:00:32
+fabricmgrd                       RUNNING   pid 516, uptime 0:00:08
+fdbsyncd                         RUNNING   pid 295, uptime 0:00:29
+fpmsyncd                         RUNNING   pid 301, uptime 0:00:27
+gbsyncd                          STOPPED   Not started
+gearsyncd                        STOPPED   Not started
+intfmgrd                         RUNNING   pid 451, uptime 0:00:23
+mgmtd                            RUNNING   pid 483, uptime 0:00:19
+natmgrd                          RUNNING   pid 505, uptime 0:00:11
+natsyncd                         RUNNING   pid 508, uptime 0:00:10
+nbrmgrd                          RUNNING   pid 492, uptime 0:00:15
+neighsyncd                       RUNNING   pid 286, uptime 0:00:30
+orchagent                        RUNNING   pid 140, uptime 0:00:33
+pathd                            STOPPED   Not started
+portmgrd                         RUNNING   pid 320, uptime 0:00:24
+portsyncd                        RUNNING   pid 137, uptime 0:00:34
+redis-chassis                    STOPPED   Not started
+redis-server                     RUNNING   pid 82, uptime 0:00:37
+restore_neighbors                STOPPED   Not started
+rsyslogd                         RUNNING   pid 77, uptime 0:00:38
+sflowmgrd                        RUNNING   pid 502, uptime 0:00:13
+start.sh                         EXITED    Nov 21 02:53 PM
+staticd                          RUNNING   pid 485, uptime 0:00:18
+syncd                            RUNNING   pid 113, uptime 0:00:35
+teammgrd                         RUNNING   pid 304, uptime 0:00:26
+teamsyncd                        RUNNING   pid 298, uptime 0:00:28
+tunnelmgrd                       RUNNING   pid 511, uptime 0:00:09
+vlanmgrd                         RUNNING   pid 457, uptime 0:00:21
+vrfmgrd                          RUNNING   pid 307, uptime 0:00:25
+vxlanmgrd                        RUNNING   pid 495, uptime 0:00:14
+zebra                            RUNNING   pid 477, uptime 0:00:20
+
+### ps -eo pid,args | grep -E 'bgpd|zebra|bfdd|fpmsyncd|orchagent|syncd|redis|bgpcfgd|frrcfgd|gnmi|telemetry' | grep -v grep
+     82 /usr/bin/redis-server 127.0.0.1:6379
+    113 /usr/bin/syncd -u -s -B null -l -p /usr/share/sonic/hwsku/sai.profile
+    137 /usr/bin/portsyncd
+    140 /usr/bin/orchagent -d /var/log/swss -b 8192 -s -m ce:1b:b6:46:b6:bc
+    286 /usr/bin/neighsyncd
+    295 /usr/bin/fdbsyncd
+    298 /usr/bin/teamsyncd
+    301 /usr/bin/fpmsyncd
+    477 /usr/lib/frr/zebra -A 127.0.0.1 -s 90000000 -M dplane_fpm_sonic --asic-offload=notify_on_offload
+    508 /usr/bin/natsyncd
+
+### vtysh -c 'show version' | head -3
+FRRouting 10.3 (sonic) on Linux(7.0.0-1020-azure).
+Copyright 1996-2005 Kunihiro Ishiguro, et al.
+configured with:
+
+### ls /usr/lib/frr/ | tr '\n' ' '
+babeld bfdd bgpd eigrpd fabricd frr-reload frrcommon.sh frrinit.sh isisd ldpd mgmtd nhrpd ospf6d ospfd pathd pbrd pim6d pimd ripd ripngd staticd vrrpd watchfrr watchfrr.sh zebra 
+### sonic-db-cli PING; for d in APPL_DB ASIC_DB COUNTERS_DB CONFIG_DB STATE_DB; do echo $d $(sonic-db-cli $d DBSIZE); done
+PONG
+APPL_DB 175
+ASIC_DB 1475
+COUNTERS_DB 8
+CONFIG_DB 309
+STATE_DB 131
+
+### sonic-cfggen -d --var-json DEVICE_METADATA
+{
+    "localhost": {
+        "buffer_model": "traditional",
+        "hwsku": "Force10-S6000",
+        "mac": "ce:1b:b6:46:b6:bc",
+        "switch_type": "switch"
+    }
+}
+
+### sonic-cfggen -d --print-data | python3 -c 'import sys,json; d=json.load(sys.stdin); print(sorted(d))'
+['BREAKOUT_CFG', 'BUFFER_PG', 'BUFFER_POOL', 'BUFFER_PROFILE', 'BUFFER_QUEUE', 'CABLE_LENGTH', 'DEVICE_METADATA', 'DSCP_TO_TC_MAP', 'FEATURE', 'LOGGER', 'MAP_PFC_PRIORITY_TO_QUEUE', 'PORT', 'PORT_QOS_MAP', 'SCHEDULER', 'TC_TO_PRIORITY_GROUP_MAP', 'TC_TO_QUEUE_MAP', 'WRED_PROFILE']
+
+### cat /usr/share/sonic/hwsku/port_config.ini | head -8; ls /usr/share/sonic/hwsku/
+# name          lanes             alias             index       speed
+Ethernet0       25,26,27,28       fortyGigE0/0      0           40000
+Ethernet4       29,30,31,32       fortyGigE0/4      1           40000
+BALANCED
+RDMA-CENTRIC
+TCP-CENTRIC
+buffer_ports_t0.j2
+buffer_ports_t1.j2
+buffers.json.j2
+buffers_defaults_def.j2
+buffers_defaults_t0.j2
+buffers_defaults_t1.j2
+fabriclanemap.ini
+hwsku.json
+lanemap.ini
+lanemap.ini.orig
+pai.profile
+pg_profile_lookup.ini
+port_config.ini
+port_config.ini.orig
+qos.json.j2
+sai.profile
+sai_mlnx.profile
+td2-s6000-32x40G.config.bcm
+
+### cat /usr/share/sonic/hwsku/lanemap.ini 2>/dev/null | head -6
+eth1:25,26,27,28
+eth2:29,30,31,32
+
+### ip -br link | head -20; ip -br addr | head -12
+lo               UNKNOWN        00:00:00:00:00:00 <LOOPBACK,UP,LOWER_UP> 
+eth0@if7         UP             ce:1b:b6:46:b6:bc <BROADCAST,MULTICAST,UP,LOWER_UP> 
+Ethernet0        DOWN           ce:1b:b6:46:b6:bc <BROADCAST,MULTICAST> 
+Ethernet4        DOWN           ce:1b:b6:46:b6:bc <BROADCAST,MULTICAST> 
+Ethernet24       DOWN           ce:1b:b6:46:b6:bc <BROADCAST,MULTICAST> 
+Ethernet28       DOWN           ce:1b:b6:46:b6:bc <BROADCAST,MULTICAST> 
+Ethernet36       DOWN           ce:1b:b6:46:b6:bc <BROADCAST,MULTICAST> 
+eth1@if9         DOWN           aa:c1:ab:a8:1f:79 <BROADCAST,MULTICAST,NOARP,PROMISC> 
+Ethernet32       DOWN           ce:1b:b6:46:b6:bc <BROADCAST,MULTICAST> 
+eth2@if11        DOWN           aa:c1:ab:0f:14:17 <BROADCAST,MULTICAST,NOARP,PROMISC> 
+Ethernet40       DOWN           ce:1b:b6:46:b6:bc <BROADCAST,MULTICAST> 
+Ethernet44       DOWN           ce:1b:b6:46:b6:bc <BROADCAST,MULTICAST> 
+Ethernet8        DOWN           ce:1b:b6:46:b6:bc <BROADCAST,MULTICAST> 
+Ethernet12       DOWN           ce:1b:b6:46:b6:bc <BROADCAST,MULTICAST> 
+Ethernet20       DOWN           ce:1b:b6:46:b6:bc <BROADCAST,MULTICAST> 
+Ethernet16       DOWN           ce:1b:b6:46:b6:bc <BROADCAST,MULTICAST> 
+Ethernet52       DOWN           ce:1b:b6:46:b6:bc <BROADCAST,MULTICAST> 
+Ethernet48       DOWN           ce:1b:b6:46:b6:bc <BROADCAST,MULTICAST> 
+Ethernet56       DOWN           ce:1b:b6:46:b6:bc <BROADCAST,MULTICAST> 
+Ethernet60       DOWN           ce:1b:b6:46:b6:bc <BROADCAST,MULTICAST> 
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+eth0@if7         UP             172.20.20.2/24 3fff:172:20:20::2/64 fe80::cc1b:b6ff:fe46:b6bc/64 
+Ethernet0        DOWN           
+Ethernet4        DOWN           
+Ethernet24       DOWN           
+Ethernet28       DOWN           
+Ethernet36       DOWN           
+eth1@if9         DOWN           
+Ethernet32       DOWN           
+eth2@if11        DOWN           
+Ethernet40       DOWN           
+Ethernet44       DOWN           
+
+### show interfaces status 2>/dev/null | head -8
+  Interface            Lanes    Speed    MTU    FEC           Alias    Vlan    Oper    Admin    Type    Asym PFC
+-----------  ---------------  -------  -----  -----  --------------  ------  ------  -------  ------  ----------
+  Ethernet0      25,26,27,28     100G   9100    N/A    fortyGigE0/0  routed    down     down     N/A         N/A
+  Ethernet4      29,30,31,32     100G   9100    N/A    fortyGigE0/4  routed    down     down     N/A         N/A
+  Ethernet8      33,34,35,36     100G   9100    N/A    fortyGigE0/8  routed    down     down     N/A         N/A
+ Ethernet12      37,38,39,40     100G   9100    N/A   fortyGigE0/12  routed    down     down     N/A         N/A
+ Ethernet16      45,46,47,48     100G   9100    N/A   fortyGigE0/16  routed    down     down     N/A         N/A
+ Ethernet20      41,42,43,44     100G   9100    N/A   fortyGigE0/20  routed    down     down     N/A         N/A
+
+### sonic-db-cli APPL_DB keys 'PORT_TABLE:*' | head -5; sonic-db-cli APPL_DB HGETALL PORT_TABLE:Ethernet0
+PORT_TABLE:Ethernet64
+PORT_TABLE:Ethernet0
+PORT_TABLE:Ethernet4
+PORT_TABLE:Ethernet48
+PORT_TABLE:Ethernet56
+{'alias': 'fortyGigE0/0', 'index': '0', 'lanes': '25,26,27,28', 'speed': '100000', 'subport': '0', 'oper_status': 'down', 'flap_count': '2', 'mtu': '9100', 'admin_status': 'down', 'last_up_time': 'Sat Nov 21 14:53:42 2026', 'last_down_time': 'Sat Nov 21 14:53:42 2026'}
+
+### sonic-db-cli ASIC_DB keys 'ASIC_STATE:SAI_OBJECT_TYPE_*' | cut -d: -f2 | sort | uniq -c | sort -rn | head -15
+    672 SAI_OBJECT_TYPE_QUEUE
+    416 SAI_OBJECT_TYPE_SCHEDULER_GROUP
+    256 SAI_OBJECT_TYPE_INGRESS_PRIORITY_GROUP
+     33 SAI_OBJECT_TYPE_PORT
+     32 SAI_OBJECT_TYPE_PORT_SERDES
+     16 SAI_OBJECT_TYPE_HOSTIF_TRAP
+      7 SAI_OBJECT_TYPE_POLICER
+      7 SAI_OBJECT_TYPE_HOSTIF_TRAP_GROUP
+      4 SAI_OBJECT_TYPE_ROUTE_ENTRY
+      4 SAI_OBJECT_TYPE_QOS_MAP
+      3 SAI_OBJECT_TYPE_BUFFER_PROFILE
+      3 SAI_OBJECT_TYPE_BUFFER_POOL
+      2 SAI_OBJECT_TYPE_SCHEDULER
+      2 SAI_OBJECT_TYPE_HOSTIF
+      2 SAI_OBJECT_TYPE_HASH
+
+### cat /etc/sonic/frr/bgpd.conf 2>/dev/null | head -20; ls /etc/sonic/frr/
+ls: cannot access '/etc/sonic/frr/': No such file or directory
+
+### which config show sonic-db-cli sonic-cfggen redis-cli; ss -ltnp | head -20
+/usr/local/bin/config
+/usr/local/bin/show
+/usr/bin/sonic-db-cli
+/usr/local/bin/sonic-cfggen
+/usr/bin/redis-cli
+State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess                              
+LISTEN 0      3          127.0.0.1:2601       0.0.0.0:*    users:(("zebra",pid=477,fd=26))     
+LISTEN 0      2          127.0.0.1:2620       0.0.0.0:*    users:(("fpmsyncd",pid=301,fd=24))  
+LISTEN 0      3          127.0.0.1:2623       0.0.0.0:*    users:(("mgmtd",pid=483,fd=12))     
+LISTEN 0      3          127.0.0.1:2616       0.0.0.0:*    users:(("staticd",pid=485,fd=9))    
+LISTEN 0      4096      127.0.0.11:34175      0.0.0.0:*                                        
+LISTEN 0      511        127.0.0.1:6379       0.0.0.0:*    users:(("redis-server",pid=82,fd=6))
+LISTEN 0      511            [::1]:6379          [::]:*    users:(("redis-server",pid=82,fd=7))
+clab-sprobe-frr 14MiB / 15.61GiB
+clab-sprobe-sonic 132.3MiB / 15.61GiB
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/root       145G   41G  104G  29% /

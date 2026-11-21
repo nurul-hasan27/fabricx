@@ -23,3 +23,11 @@
 | Host image | fabricx-host:1 built from images/host/Dockerfile (alpine:3.20 + python3, iperf3, tcpdump, iputils, iproute2), image id sha256:8993553a58718bf5ad92381d13094db3578c98c3302bf41bc45a76fee69646b8, 84 MB |
 | tcpdump in VM | installed with apt (for pcap capture/read) |
 | Python (Mac venv) | 3.14.6; pydantic 2.14.4, jinja2 3.1.6, typer 0.29.2, pytest 9.2.0 |
+
+## Added in Phase 7
+| Item | Value |
+|---|---|
+| SONiC-VS image | official `docker-sonic-vs`, branch 202505, build 1238524 (commit ff3c0c9f6, built 2026-10-04), 228,399,828 bytes gz, sha256 40697b8c16096d418490dc59f571aaa3d35a0472c21a5e823c9b5a32c1a91005; loaded 850,770,450 bytes, amd64 (`artifacts/phase7/sonic-image.txt`) |
+| FRR inside SONiC | 10.3 (sonic) |
+| x86 runner | GitHub Actions `ubuntu-latest` (kernel 7.0.0-1020-azure in the logs), Python 3.12 / 3.14 venv |
+| pytest-timeout | used in CI only |

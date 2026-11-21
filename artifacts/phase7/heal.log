@@ -1,0 +1,3 @@
+[fabricx-heal] leaf1: own Type-5 routes present after ~2 s
+[fabricx-heal] leaf2: own Type-5 missing after 20 s -> re-adding L3VNI(s)
+[fabricx-heal] leaf2: after re-adding L3VNI(s): repaired

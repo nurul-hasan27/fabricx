@@ -1,0 +1,60 @@
+{
+ "n": 10,
+ "complete": 10,
+ "poll_period_s": 0.053,
+ "meaning": "seconds after leaf1's announce command until the prefix is in APPL_DB ROUTE_TABLE (consumed by orchagent) / in ASIC_DB; resolution = poll period",
+ "median_route_table_s": 0.1645,
+ "median_asic_s": 0.2185,
+ "runs": [
+  {
+   "run": 1,
+   "route_table_s": 0.164,
+   "asic_s": 0.217
+  },
+  {
+   "run": 2,
+   "route_table_s": 0.162,
+   "asic_s": 0.214
+  },
+  {
+   "run": 3,
+   "route_table_s": 0.265,
+   "asic_s": 0.317
+  },
+  {
+   "run": 4,
+   "route_table_s": 0.269,
+   "asic_s": 0.323
+  },
+  {
+   "run": 5,
+   "route_table_s": 0.164,
+   "asic_s": 0.218
+  },
+  {
+   "run": 6,
+   "route_table_s": 0.163,
+   "asic_s": 0.218
+  },
+  {
+   "run": 7,
+   "route_table_s": 0.162,
+   "asic_s": 0.215
+  },
+  {
+   "run": 8,
+   "route_table_s": 0.165,
+   "asic_s": 0.219
+  },
+  {
+   "run": 9,
+   "route_table_s": 0.269,
+   "asic_s": 0.321
+  },
+  {
+   "run": 10,
+   "route_table_s": 0.263,
+   "asic_s": 0.316
+  }
+ ]
+}

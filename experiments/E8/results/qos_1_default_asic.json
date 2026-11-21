@@ -1,0 +1,15 @@
+{
+ "asic": {
+  "port": {},
+  "queue3": {
+   "NULL": "NULL",
+   "SAI_QUEUE_ATTR_BUFFER_PROFILE_ID": "oid:0x190000000005b5",
+   "SAI_QUEUE_ATTR_TYPE": "SAI_QUEUE_TYPE_UNICAST",
+   "SAI_QUEUE_ATTR_INDEX": "3"
+  },
+  "pg3": {
+   "NULL": "NULL"
+  }
+ },
+ "orchagent_syncd_errors_or_warnings": []
+}

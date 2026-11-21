@@ -1,0 +1,56 @@
+============================= test session starts ==============================
+platform linux -- Python 3.14.4, pytest-9.2.0, pluggy-1.7.0 -- /home/runner/work/fabricx/fabricx/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/runner/work/fabricx/fabricx
+configfile: pyproject.toml
+plugins: timeout-2.4.0
+timeout: 400.0s
+timeout method: signal
+timeout func_only: False
+collecting ... collected 56 items / 14 deselected / 42 selected
+
+tests/lab/test_drill.py::test_blind_drill_score_meets_target PASSED      [  2%]
+tests/lab/test_engine_hardening.py::test_drift_clean_then_detects_manual_vtysh_change_then_clean_again PASSED [  4%]
+tests/lab/test_engine_hardening.py::test_paused_node_is_reported_unreachable_not_a_crash PASSED [  7%]
+tests/lab/test_engine_validate.py::test_engine_finds_nothing_on_healthy_fabric PASSED [  9%]
+tests/lab/test_phase1_bare_fabric.py::test_all_ten_nodes_running PASSED  [ 11%]
+tests/lab/test_phase1_bare_fabric.py::test_link_up_with_mtu_and_pingable_both_ways[spine1-leaf1] PASSED [ 14%]
+tests/lab/test_phase1_bare_fabric.py::test_link_up_with_mtu_and_pingable_both_ways[spine1-leaf2] PASSED [ 16%]
+tests/lab/test_phase1_bare_fabric.py::test_link_up_with_mtu_and_pingable_both_ways[spine1-leaf3] PASSED [ 19%]
+tests/lab/test_phase1_bare_fabric.py::test_link_up_with_mtu_and_pingable_both_ways[spine2-leaf1] PASSED [ 21%]
+tests/lab/test_phase1_bare_fabric.py::test_link_up_with_mtu_and_pingable_both_ways[spine2-leaf2] PASSED [ 23%]
+tests/lab/test_phase1_bare_fabric.py::test_link_up_with_mtu_and_pingable_both_ways[spine2-leaf3] PASSED [ 26%]
+tests/lab/test_phase1_bare_fabric.py::test_loopback_configured[spine1] PASSED [ 28%]
+tests/lab/test_phase1_bare_fabric.py::test_loopback_configured[spine2] PASSED [ 30%]
+tests/lab/test_phase1_bare_fabric.py::test_loopback_configured[leaf1] PASSED [ 33%]
+tests/lab/test_phase1_bare_fabric.py::test_loopback_configured[leaf2] PASSED [ 35%]
+tests/lab/test_phase1_bare_fabric.py::test_loopback_configured[leaf3] PASSED [ 38%]
+tests/lab/test_phase1_bare_fabric.py::test_host_has_address_and_gateway[h1] PASSED [ 40%]
+tests/lab/test_phase1_bare_fabric.py::test_host_has_address_and_gateway[h2] PASSED [ 42%]
+tests/lab/test_phase1_bare_fabric.py::test_host_has_address_and_gateway[h3] PASSED [ 45%]
+tests/lab/test_phase1_bare_fabric.py::test_host_has_address_and_gateway[h4] PASSED [ 47%]
+tests/lab/test_phase2_underlay.py::test_all_bgp_sessions_established PASSED [ 50%]
+tests/lab/test_phase2_underlay.py::test_two_kernel_nexthops_to_every_remote_leaf_loopback[leaf1] PASSED [ 52%]
+tests/lab/test_phase2_underlay.py::test_two_kernel_nexthops_to_every_remote_leaf_loopback[leaf2] PASSED [ 54%]
+tests/lab/test_phase2_underlay.py::test_two_kernel_nexthops_to_every_remote_leaf_loopback[leaf3] PASSED [ 57%]
+tests/lab/test_phase2_underlay.py::test_bfd_peers_up[spine1] PASSED      [ 59%]
+tests/lab/test_phase2_underlay.py::test_bfd_peers_up[spine2] PASSED      [ 61%]
+tests/lab/test_phase2_underlay.py::test_bfd_peers_up[leaf1] PASSED       [ 64%]
+tests/lab/test_phase2_underlay.py::test_bfd_peers_up[leaf2] PASSED       [ 66%]
+tests/lab/test_phase2_underlay.py::test_bfd_peers_up[leaf3] PASSED       [ 69%]
+tests/lab/test_phase2_underlay.py::test_loopback_to_loopback_ping_all_leaf_pairs PASSED [ 71%]
+tests/lab/test_phase2_underlay.py::test_probe_across_fabric_no_loss_and_documented_resolution PASSED [ 73%]
+tests/lab/test_phase3_overlay.py::test_class1_same_subnet_different_leaf_l2vni PASSED [ 76%]
+tests/lab/test_phase3_overlay.py::test_class2_different_subnet_same_leaf_local_routing PASSED [ 78%]
+tests/lab/test_phase3_overlay.py::test_class3_different_subnet_different_leaf_symmetric_irb PASSED [ 80%]
+tests/lab/test_phase3_overlay.py::test_class4_different_vrf_must_fail SKIPPED [ 83%]
+tests/lab/test_phase3_overlay.py::test_gateway_reachable_from_every_host PASSED [ 85%]
+tests/lab/test_phase3_overlay.py::test_anycast_gateway_mac_identical_on_every_leaf PASSED [ 88%]
+tests/lab/test_phase3_overlay.py::test_evpn_route_types_present[leaf1] PASSED [ 90%]
+tests/lab/test_phase3_overlay.py::test_evpn_route_types_present[leaf2] PASSED [ 92%]
+tests/lab/test_phase3_overlay.py::test_evpn_route_types_present[leaf3] PASSED [ 95%]
+tests/lab/test_phase3_overlay.py::test_red_routes_not_leaked_to_blue_vrf_table PASSED [ 97%]
+tests/lab/test_phase3_overlay.py::test_pcap_shows_vtep_outer_header_and_vnis PASSED [100%]
+
+- generated xml file: /home/runner/work/fabricx/fabricx/artifacts/sonic/junit.xml -
+=========== 41 passed, 1 skipped, 14 deselected in 95.61s (0:01:35) ============

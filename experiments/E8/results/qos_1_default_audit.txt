@@ -1,0 +1,2 @@
+INFO  QOS-000 PORT_QOS_MAP: no port has pfc_enable: no lossless class is configured, so there is nothing to audit
+1 findings

@@ -1,0 +1,2 @@
+report: artifacts/sonic/validate/2026-11-21T16-18-16Z/report.md
+PASS

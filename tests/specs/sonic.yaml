@@ -9,11 +9,31 @@
     - tests/unit/test_qos_lossless.py::test_ports_disagreeing_on_lossless_priorities
   evidence: [tests/fixtures/sonic_config_db_lossless_good.json]
 - id: REQ-SONIC-002
-  title: SONiC route trace logic (fake node only)
-  requirement: The tracer follows a prefix from APPL_DB to the ASIC_DB route entry and next hop, and shows where the chain stops. Verified against a fake node; NOT yet against a real SONiC image.
+  title: SONiC route trace logic
+  requirement: The tracer follows a prefix from bgpd and zebra through APPL_DB (including the producer staging key) to the ASIC_DB route entry, ECMP group, members and next hops, and shows where the chain stops. Unit-tested with a fake node; run against the real SONiC-VS image in E8.
   steps: ["run the tracer against a scripted fake node"]
   pass: hops in order APPL_DB, ASIC_DB, ASIC_DB; a missing hop is shown as empty
   tests:
     - tests/unit/test_sonic_adapter.py::test_trace_follows_appl_to_asic_to_nexthop
     - tests/unit/test_sonic_adapter.py::test_trace_shows_where_chain_stops
-  evidence: [src/fabricx/adapters/sonic.py]
+    - tests/unit/test_sonic_adapter.py::test_ecmp_group_members_are_followed
+  evidence: [experiments/E8/results/trace_route_loopback.md, experiments/E8/results/trace_orchagent_frozen.md]
+- id: REQ-SONIC-003
+  title: SONiC-VS leaf variant is generated from the inventory
+  requirement: A leaf with nos sonic-vs gets a containerlab sonic-vs node, a CONFIG_DB-driven bring-up script and the same FRR underlay config as the other leaves (without address lines); invalid SONiC inventories are rejected; checks use the SONiC port for MTU.
+  steps: ["render the sonic-leaf3 variant", "load mutated variants", "validate a synthetic state with the 22-byte wire overhead"]
+  pass: expected files and lines; ValidationError for hosts on the SONiC leaf or a missing image; no MTU finding for eth1 9122 / Ethernet0 9100
+  tests:
+    - tests/unit/test_sonic_variant.py::test_sonic_variant_generates_db_driven_bringup
+    - tests/unit/test_sonic_variant.py::test_sonic_leaf_with_hosts_is_rejected
+    - tests/unit/test_sonic_variant.py::test_sonic_without_image_is_rejected
+    - tests/unit/test_sonic_variant.py::test_mtu_is_checked_on_the_routed_interface
+  evidence: [inventory/variants/sonic-leaf3.yaml, artifacts/phase7/pytest.txt, artifacts/phase7/validate.txt]
+- id: REQ-SONIC-004
+  title: SONiC image lines are not reported as drift
+  requirement: Drift ignores the zebra lines the SONiC-VS image adds itself, on SONiC nodes only.
+  steps: ["diff a generated config against a running config with the image lines, for nos sonic-vs and frr"]
+  pass: no drift for sonic-vs; the same lines are drift on an FRR node
+  tests:
+    - tests/unit/test_drift.py::test_sonic_image_zebra_lines_are_not_drift_on_sonic_nodes_only
+  evidence: [artifacts/phase7/drift.txt]

@@ -20,7 +20,9 @@
 | REQ-OVERLAY-005 | Anycast gateway | 1 | pass (1/1) | inventory/fabric.yaml |
 | REQ-OVERLAY-006 | EVPN route types | 4 | pass (4/4) | artifacts/phase3/leaf1-evpn-routes.json |
 | REQ-SONIC-001 | Lossless QoS configuration auditor | 10 | pass (10/10) | tests/fixtures/sonic_config_db_lossless_good.json |
-| REQ-SONIC-002 | SONiC route trace logic (fake node only) | 2 | pass (2/2) | src/fabricx/adapters/sonic.py |
+| REQ-SONIC-002 | SONiC route trace logic | 3 | pass (3/3) | experiments/E8/results/trace_route_loopback.md, experiments/E8/results/trace_orchagent_frozen.md |
+| REQ-SONIC-003 | SONiC-VS leaf variant is generated from the inventory | 4 | pass (4/4) | inventory/variants/sonic-leaf3.yaml, artifacts/phase7/pytest.txt, artifacts/phase7/validate.txt |
+| REQ-SONIC-004 | SONiC image lines are not reported as drift | 1 | pass (1/1) | artifacts/phase7/drift.txt |
 | REQ-UNDERLAY-001 | eBGP sessions | 2 | pass (2/2) | artifacts/validate/ |
 | REQ-UNDERLAY-002 | ECMP | 4 | pass (4/4) | artifacts/validate/ |
 | REQ-UNDERLAY-003 | BFD | 6 | pass (6/6) | experiments/E1/results.md |

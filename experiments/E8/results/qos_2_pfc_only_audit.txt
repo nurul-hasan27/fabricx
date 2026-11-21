@@ -1,0 +1,11 @@
+WARN  QOS-006 Ethernet0: no BUFFER_PG entry for lossless priority 3 in CONFIG_DB (with the dynamic buffer model it is created at runtime in APPL_DB)
+ERROR QOS-007 Ethernet0: lossless queue 3 has no WRED/ECN profile: congestion is signalled only by PFC pause
+WARN  QOS-006 Ethernet0: no BUFFER_PG entry for lossless priority 4 in CONFIG_DB (with the dynamic buffer model it is created at runtime in APPL_DB)
+ERROR QOS-007 Ethernet0: lossless queue 4 has no WRED/ECN profile: congestion is signalled only by PFC pause
+WARN  QOS-008 Ethernet0: PFC watchdog is not configured: a stuck receiver can pause the link indefinitely
+WARN  QOS-006 Ethernet4: no BUFFER_PG entry for lossless priority 3 in CONFIG_DB (with the dynamic buffer model it is created at runtime in APPL_DB)
+ERROR QOS-007 Ethernet4: lossless queue 3 has no WRED/ECN profile: congestion is signalled only by PFC pause
+WARN  QOS-006 Ethernet4: no BUFFER_PG entry for lossless priority 4 in CONFIG_DB (with the dynamic buffer model it is created at runtime in APPL_DB)
+ERROR QOS-007 Ethernet4: lossless queue 4 has no WRED/ECN profile: congestion is signalled only by PFC pause
+WARN  QOS-008 Ethernet4: PFC watchdog is not configured: a stuck receiver can pause the link indefinitely
+10 findings
