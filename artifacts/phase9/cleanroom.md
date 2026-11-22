@@ -32,3 +32,8 @@ modified) removed from git.
 ## Not covered
 A brand-new arm64 VM (the existing VM already had Docker, Containerlab and the FRR image; `vm_setup.sh` found all of
 them and installed nothing). The x86 fresh-machine path is covered by CI on every push.
+
+## x86 fresh machine (GitHub Actions run 44991965377, commit 78f6469)
+`make vm-setup RUN=sudo` → "installing Containerlab 0.83.0 (amd64), found 'none'", ready on x86_64 kernel
+7.0.0-1016-aws, Docker 29.4.2; `make setup`, `make up`, `make test` → 121 passed, validate PASS, no drift,
+28 requirements. One run so far.

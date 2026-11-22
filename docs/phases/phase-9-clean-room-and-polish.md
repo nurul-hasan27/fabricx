@@ -74,7 +74,7 @@ All from `artifacts/phase9/` (`cleanroom.md` is the step-by-step record).
 | Item | Tier |
 |---|---|
 | Fresh clone → green suite with only the README (Mac) | BUILT + RUN (existing VM reused; host image from Docker's cache) |
-| Fresh x86 machine on every CI push, README commands | BUILT (first run of the new workflow: see BUILD_LOG) |
+| Fresh x86 machine on every CI push, README commands | BUILT + RUN (run 44991965377: vm-setup installed Containerlab from nothing; 121 passed, validate PASS, no drift; one run so far) |
 | Brand-new arm64 VM from scratch | NOT DONE (would download ~0.5 GB; needs your OK) |
 | Demo video | script and rehearsal done; recording is yours to do |
 

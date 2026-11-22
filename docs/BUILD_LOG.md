@@ -126,3 +126,4 @@ Phase 3 said spines need `neighbor FABRIC nexthop-unchanged` for EVPN. That was 
 - Not covered: a brand-new arm64 VM (existing VM reused; host image from build cache).
 - Docs: README rewritten (quick start from nothing, reading order, linked evidence index), limitations merged into one page incl. reproducibility limits, docs/DEMO.md rehearsed on the lab (F08 demo: diagnose ~12 s, everything else < 5 s). Resume bullets and interview rehearsal kept private in git-ignored docs/private/.
 - Mistakes caught before publishing: README draft had spine ASN 65100 (is 65000), untested "Intel Mac" and "4 GB RAM" claims; demo script claimed validate checks traffic classes (it doesn't).
+- CI run 44991965377 (first with the README commands, fresh x86 runner, kernel 7.0.0-1016-aws): vm-setup installed Containerlab 0.83.0 from nothing; make test 121 passed, validate PASS, no drift, 28 requirements; lint and Trivy green.
