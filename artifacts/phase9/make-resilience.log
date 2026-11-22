@@ -1,0 +1,5 @@
+.venv/bin/pytest tests -q -m resilience --junitxml=artifacts/junit_resilience.xml
+...............                                                          [100%]
+15 passed, 121 deselected in 313.83s (0:05:13)
+make resilience  19.76s user 19.40s system 12% cpu 5:14.45 total
+exit=0

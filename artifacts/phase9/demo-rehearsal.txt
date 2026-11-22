@@ -1,0 +1,136 @@
+# Demo rehearsal 2026-11-22T05:59:25Z (Mac M1, lab from the Phase 9 clean-room clone, monitoring up)
+
+=== 0:00 generate (config from inventory)
+$ .venv/bin/fabricx generate
+wrote 22 files to generated/ and docs/topology.md
+--- exit 0, 0.4 s
+
+=== 0:00 generated files unchanged vs git
+$ git status --short generated/
+--- exit 0, 0.0 s
+
+=== 0:45 validate
+$ .venv/bin/fabricx validate
+report: artifacts/validate/2026-11-22T05-59-26Z/report.md
+PASS
+--- exit 0, 2.9 s
+
+=== 1:45 list faults
+$ .venv/bin/fabricx faults
+F01  [L1 links]  Leaf-spine link down  -  ip link set eth1 down on leaf1
+F02  [L1 links]  Gray failure (both directions)  -  tc netem loss 100% on both ends of leaf1-spine1, link stays UP
+F03  [L1 links]  Unidirectional loss  -  netem loss 100% only on leaf1's transmit side of leaf1-spine1
+F04  [L1 links]  Lossy link (2%)  -  netem loss 2% on leaf1 transmit side of leaf1-spine1
+F05  [Underlay MTU]  Underlay MTU 1500 on one link  -  ip link set mtu 1500 on both ends of leaf1-spine1
+F06  [BGP sessions]  BGP ASN mismatch  -  spine1 expects AS 65999 from leaf2
+F07  [VTEP reachability]  Loopback not advertised  -  leaf3 stops advertising its /32 loopback
+F08  [EVPN routes]  Route-target mismatch on one VNI  -  leaf2 uses RT 65002:99999 for VNI 10010
+F09  [VNI/VLAN maps]  VNI/VLAN mapping mismatch  -  leaf2's VLAN 10 bridge carries VNI 10099 instead of 10010
+F10  [VNI/VLAN maps]  Missing L3VNI on one leaf  -  leaf2: `vrf RED / no vni 50001`
+F11  [Forwarding]  ECMP hash policy L3-only  -  leaf1 fib_multipath_hash_policy=0
+F12  [FDB / ARP]  Duplicate MAC on two leaves  -  h3 (leaf2) takes h1's MAC (leaf1)
+F13  [BGP sessions]  bgpd hung on a spine  -  kill -STOP bgpd on spine1 (BFD keeps running)
+F14  [FDB / ARP]  Anycast gateway MAC mismatch  -  leaf2's br10 has a different MAC than the inventory's anycast MAC
+--- exit 0, 0.4 s
+
+=== 1:45 inject F08
+$ .venv/bin/fabricx inject F08
+injected F08; restore with `fabricx restore`
+--- exit 0, 0.8 s
+
+=== 2:15 customer view: h1 -> h3 same subnet (VLAN 10, across leaves)
+$ dx clab-fabricx-h1 ping -c2 -W1 10.10.10.103
+PING 10.10.10.103 (10.10.10.103) 56(84) bytes of data.
+
+--- 10.10.10.103 ping statistics ---
+2 packets transmitted, 0 received, 100% packet loss, time 1059ms
+
+--- exit 1, 2.2 s
+
+=== 2:15 customer view: h1 -> h4 routed (VLAN 10 -> 20)
+$ dx clab-fabricx-h1 ping -c2 -W1 10.20.20.104
+PING 10.20.20.104 (10.20.20.104) 56(84) bytes of data.
+64 bytes from 10.20.20.104: icmp_seq=1 ttl=62 time=0.568 ms
+64 bytes from 10.20.20.104: icmp_seq=2 ttl=62 time=0.421 ms
+
+--- 10.20.20.104 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1013ms
+rtt min/avg/max/mdev = 0.421/0.494/0.568/0.073 ms
+--- exit 0, 1.1 s
+
+=== 2:45 diagnose
+$ .venv/bin/fabricx diagnose
+[1] Layer: EVPN routes
+    Cause: rt-mismatch on leaf1, leaf2 (confidence high)
+    Probable cause: Route-targets of VNI 10010 do not match between leaves; routes are not imported
+    Evidence: VNI 10010: leaf1 imports ['65001:10010'] but leaf2 exports ['65002:99999']
+    Evidence: VNI 10010: leaf2 imports ['65002:99999'] but leaf1 exports ['65001:10010']
+Customer view: h1>h3 same-subnet=FAIL, h1>h2 local-route=ok, h1>h4 routed=ok, h1>h5 isolation=isolated
+--- exit 1, 12.1 s
+
+=== 2:45 confirm by hand on leaf2
+$ dx clab-fabricx-leaf2 vtysh -c show bgp l2vpn evpn vni 10010
+VNI: 10010 (known to the kernel)
+  Type: L2
+  Tenant-Vrf: RED
+  RD: 10.0.0.12:3
+  Originator IP: 10.0.0.12
+  Mcast group: 0.0.0.0
+  MAC-VRF Site-of-Origin: 
+  Advertise-gw-macip : Disabled
+  Advertise-svi-macip : Disabled
+  SVI interface : br10
+  Import Route Target:
+    65002:99999
+  Export Route Target:
+    65002:99999
+--- exit 0, 0.1 s
+
+=== 2:45 compare with leaf1
+$ dx clab-fabricx-leaf1 vtysh -c show bgp l2vpn evpn vni 10010
+VNI: 10010 (known to the kernel)
+  Type: L2
+  Tenant-Vrf: RED
+  RD: 10.0.0.11:3
+  Originator IP: 10.0.0.11
+  Mcast group: 0.0.0.0
+  MAC-VRF Site-of-Origin: 
+  Advertise-gw-macip : Disabled
+  Advertise-svi-macip : Disabled
+  SVI interface : br10
+  Import Route Target:
+    65001:10010
+  Export Route Target:
+    65001:10010
+--- exit 0, 0.1 s
+
+=== 3:45 restore
+$ .venv/bin/fabricx restore
+restored F08
+--- exit 0, 0.7 s
+
+=== 3:45 validate again
+$ .venv/bin/fabricx validate
+report: artifacts/validate/2026-11-22T06-00-11Z/report.md
+PASS
+--- exit 0, 4.2 s
+
+=== 4:30 Grafana annotations just posted
+$ curl -s http://fabricx-lab.orb.local:3000/api/annotations?tags=fabricx&limit=4
+[{"id":2,"alertId":0,"alertName":"","dashboardId":0,"dashboardUID":null,"panelId":0,"userId":0,"newState":"","prevState":"","created":1795327196425,"updated":1795327196425,"time":1795327196356,"timeEnd":1795327196356,"text":"restore F08: Route-target mismatch on one VNI","tags":["fabricx","restore","F08"],"login":"","email":"","avatarUrl":"","data":{}},{"id":1,"alertId":0,"alertName":"","dashboardId":0,"dashboardUID":null,"panelId":0,"userId":0,"newState":"","prevState":"","created":1795327170096,"updated":1795327170096,"time":1795327169739,"timeEnd":1795327169739,"text":"inject F08: Route-target mismatch on one VNI","tags":["fabricx","inject","F08"],"login":"","email":"","avatarUrl":"","data":{}}]--- exit 0, 0.4 s
+
+
+=== QoS audit (extra)
+$ .venv/bin/fabricx audit-qos tests/fixtures/sonic_config_db_lossless_good.json
+QoS audit: no findings (lossless configuration is consistent)
+--- exit 0, 0.4 s
+
+=== prep: run-fault F08 (rehearsed 2026-11-22T06:00:51Z)
+  "recovery_s": 1.5985279083251953,
+  "healthy_again_ts": 1795327304.954168
+ },
+ "run_dir": "artifacts/runs/2026-11-22T06-00-52Z_F08"
+}
+real 53.30
+user 3.63
+sys 4.45

@@ -1,0 +1,19 @@
+# Lab resource use, measured 2026-11-22T05:55:24Z during the Phase 9 clean-room 'make resilience' run (Mac M1, OrbStack VM)
+## docker stats --no-stream (memory per container)
+clab-fabricx-h1 60KiB / 3.893GiB
+clab-fabricx-h2 60KiB / 3.893GiB
+clab-fabricx-h3 56KiB / 3.893GiB
+clab-fabricx-h4 44KiB / 3.893GiB
+clab-fabricx-h5 304KiB / 3.893GiB
+clab-fabricx-leaf1 25.41MiB / 3.893GiB
+clab-fabricx-leaf2 25.73MiB / 3.893GiB
+clab-fabricx-leaf3 24.13MiB / 3.893GiB
+clab-fabricx-spine1 24.23MiB / 3.893GiB
+clab-fabricx-spine2 24.78MiB / 3.893GiB
+## VM memory (free -m)
+               total        used        free      shared  buff/cache   available
+Mem:            3986         759        3115          23         305        3226
+Swap:           5010           0        5010
+## images used by the default lab
+fabricx-host:1 84.3MB
+quay.io/frrouting/frr:10.2.1 313MB

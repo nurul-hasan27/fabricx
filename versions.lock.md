@@ -38,3 +38,10 @@
 | Prometheus | prom/prometheus:v3.1.0 (404 MB on disk in the VM) |
 | Grafana | grafana/grafana:11.4.0 (629 MB on disk in the VM) |
 | E6 x86 runner | kernel 7.0.0-1016-aws, 4 vCPU, tcp_dctcp loadable (`experiments/E6/results_ci/runner.txt`) |
+
+## Added in Phase 9
+| Item | Value |
+|---|---|
+| Test tools (pinned, `pyproject.toml` `dev` extra) | pytest 9.2.0, pytest-timeout 2.4.0, ruff 0.17.6, mypy 2.4.1, types-PyYAML 6.0.12.20261113 |
+| Containerlab install | `scripts/vm_setup.sh` (0.83.0 .deb for amd64/arm64 from the GitHub release) |
+| Clean-room host | Mac M1, VM kernel 7.2.12-orbstack, Python 3.14.6 (`artifacts/phase9/cleanroom.md`) |

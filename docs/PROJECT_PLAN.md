@@ -33,6 +33,8 @@ Source of truth: `docs/blueprint_v2.html`. This file only says **what we do, in 
 
 Stretch items (EVPN multihoming, Soft-RoCE, Ixia-c, NETCONF) are skipped unless time and storage allow.
 
+**Status (2026-11-22): Phases 0-9 done. Azure was never used (GitHub Actions covered all x86 work). Stretch items not done.**
+
 ## Rules for every phase
 1. I explain the phase in simple words *before* we start.
 2. You approve it.

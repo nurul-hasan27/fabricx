@@ -30,21 +30,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
-      - run: python -m venv .venv && .venv/bin/pip install -e '.[dev]'
-      - name: Install Containerlab 0.83.0 and tcpdump
-        run: |
-          curl -sLO https://github.com/srl-labs/containerlab/releases/download/v0.83.0/containerlab_0.83.0_linux_amd64.deb
-          sudo dpkg -i containerlab_0.83.0_linux_amd64.deb
-          sudo apt-get install -y tcpdump
-      - run: sudo docker build -t fabricx-host:1 images/host
-      - run: make RUN=sudo fabric-up
-      - name: Wait for convergence
-        run: sleep 45
-      - name: Smoke + functional + validation + drift
-        run: |
-          .venv/bin/pytest tests -v --timeout=400 -m "not resilience" --junitxml=artifacts/junit.xml
-          .venv/bin/fabricx validate
-          .venv/bin/fabricx drift
+      # Exactly the README's commands, on a brand-new machine every run (= the clean-room check).
+      - run: make vm-setup RUN=sudo
+      - run: make setup RUN=sudo PY=python
+      - run: make up RUN=sudo
+      - name: make test (lint, types, unit + lab tests, validate, drift, traceability)
+        run: make test
       - name: L3VNI check-and-repair log (did the start-up workaround fire?)
         if: always()
         run: for n in leaf1 leaf2 leaf3; do sudo docker exec clab-fabricx-$n cat /var/log/fabricx-heal.log 2>/dev/null; done | tee artifacts/heal.log

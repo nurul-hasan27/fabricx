@@ -3,6 +3,10 @@ VM=fabricx-lab
 RUN ?= orb -m $(VM) sudo
 PY ?= python3
 
+# One-time: Docker, tcpdump and Containerlab 0.83.0 inside the Linux machine (idempotent).
+vm-setup:
+	$(RUN) bash $(CURDIR)/scripts/vm_setup.sh
+
 # One-time setup on a fresh clone: Python venv with pinned dev tools + the lab host image.
 # (Phase 9 clean-room rerun: without this, `make up` failed on the missing image and `make test` on missing ruff.)
 setup:
@@ -37,7 +41,7 @@ lint:
 	.venv/bin/ruff check .
 	.venv/bin/mypy
 test: lint
-	.venv/bin/pytest tests -q -m "not resilience" --junitxml=artifacts/junit.xml
+	.venv/bin/pytest tests -q -m "not resilience" --timeout=400 --junitxml=artifacts/junit.xml
 	.venv/bin/fabricx validate
 	.venv/bin/fabricx drift
 	.venv/bin/fabricx trace

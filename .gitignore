@@ -6,3 +6,5 @@ artifacts/*
 !artifacts/phase*/
 docs/blueprint_v2.html
 generated/clab-*/
+docs/private/
+*.egg-info/

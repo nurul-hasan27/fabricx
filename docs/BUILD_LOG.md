@@ -118,3 +118,11 @@ Phase 3 said spines need `neighbor FABRIC nexthop-unchanged` for EVPN. That was 
 - E6 on GitHub x86 (N=5, run 44932925203): tail-drop median queue RTT 111 ms; RED+ECN cubic 2.06 ms but 1-3 of 12 connections fell back to non-ECN per run and 3 of 5 runs had ~1600 drops; DCTCP 2.67 ms, 0 drops, Jain 1.000. Mac cross-check for A/B agrees; HTB unusable in the Mac VM (TBF used).
 - Containers can only use congestion-control algorithms on the host's allowed list (DCTCP needed `net.ipv4.tcp_allowed_congestion_control`).
 - RoCE hardware test plan written (STUDIED). gNMI from SONiC not possible with the pinned image.
+
+## Phase 9 - clean-room rerun, final docs, demo
+- Clean-room #1 (fresh clone of the published README, host image hidden): `make up` failed (host image never built by the README), `make test` failed (no ruff/mypy); after hand fixes 121 passed + 1 skipped. The skip was a unit test that read git-ignored bundles, so it skipped on every fresh clone and in CI.
+- Fixes: `make vm-setup` (scripts/vm_setup.sh: Docker, tcpdump, Containerlab 0.83.0, idempotent), `make setup` (venv + pinned `.[dev]` + host image), `--timeout=400` in `make test`, bundle check is now a lab test (`test_run_fault_writes_complete_bundle`, REQ-FAULT-003 repointed), CI lab job runs the README's commands on a fresh x86 machine, `src/fabricx.egg-info/` untracked.
+- Clean-room #2 (fresh clone of the fixed commit): make setup 11.3 s, make test 121 passed / 0 skipped + validate PASS + no drift + 28 requirements, make resilience 15/15; traceability identical to the committed one. Evidence: artifacts/phase9/.
+- Not covered: a brand-new arm64 VM (existing VM reused; host image from build cache).
+- Docs: README rewritten (quick start from nothing, reading order, linked evidence index), limitations merged into one page incl. reproducibility limits, docs/DEMO.md rehearsed on the lab (F08 demo: diagnose ~12 s, everything else < 5 s). Resume bullets and interview rehearsal kept private in git-ignored docs/private/.
+- Mistakes caught before publishing: README draft had spine ASN 65100 (is 65000), untested "Intel Mac" and "4 GB RAM" claims; demo script claimed validate checks traffic classes (it doesn't).
