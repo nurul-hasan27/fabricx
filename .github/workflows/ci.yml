@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
-      - run: pip install -e . pytest ruff mypy types-PyYAML
+      - run: pip install -e '.[dev]'
       - run: ruff check .
       - run: mypy
       - run: pytest tests/unit -q
@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
-      - run: python -m venv .venv && .venv/bin/pip install -e . pytest pytest-timeout
+      - run: python -m venv .venv && .venv/bin/pip install -e '.[dev]'
       - name: Install Containerlab 0.83.0 and tcpdump
         run: |
           curl -sLO https://github.com/srl-labs/containerlab/releases/download/v0.83.0/containerlab_0.83.0_linux_amd64.deb

@@ -3,6 +3,9 @@ name = "fabricx"
 version = "0.1.0"
 requires-python = ">=3.10"
 dependencies = ["pydantic", "jinja2", "typer", "pyyaml"]
+[project.optional-dependencies]
+# Tools `make test` needs; pinned to the versions the Phase 9 clean-room rerun used.
+dev = ["pytest==9.2.0", "pytest-timeout==2.4.0", "ruff==0.17.6", "mypy==2.4.1", "types-PyYAML==6.0.12.20261113"]
 [project.scripts]
 fabricx = "fabricx.cli:app"
 [build-system]

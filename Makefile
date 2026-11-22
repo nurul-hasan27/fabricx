@@ -1,7 +1,15 @@
-# Placeholder; grows each phase.
 VM=fabricx-lab
 # How to reach Docker/Containerlab. Mac: through the OrbStack VM. CI runner: make RUN=sudo ...
 RUN ?= orb -m $(VM) sudo
+PY ?= python3
+
+# One-time setup on a fresh clone: Python venv with pinned dev tools + the lab host image.
+# (Phase 9 clean-room rerun: without this, `make up` failed on the missing image and `make test` on missing ruff.)
+setup:
+	$(PY) -m venv .venv
+	.venv/bin/pip install -q -e '.[dev]'
+	$(RUN) docker build -q -t fabricx-host:1 $(CURDIR)/images/host
+	@echo "setup done: next run 'make up' then 'make test'"
 hello-up:
 	$(RUN) containerlab deploy -t $(CURDIR)/labs/hello/hello.clab.yml
 hello-down:

@@ -21,7 +21,7 @@
   steps: ["run one fault with `fabricx run-fault`"]
   pass: bundle contains the files listed in blueprint 10.2
   tests:
-    - tests/unit/test_faults.py::test_bundle_layout
+    - tests/lab/test_faults_roundtrip.py::test_run_fault_writes_complete_bundle
   evidence: [artifacts/runs/]
 - id: REQ-DIAG-001
   title: Diagnose rules (pure)
