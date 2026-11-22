@@ -67,7 +67,7 @@ Needs Python ≥ 3.10. The lab's two images take ~400 MB and its 10 containers ~
 | Validation engine: 121 tests in `make test` (78 unit + 43 lab) + 15 resilience tests, 28 traced requirements | BUILT ([traceability](docs/traceability.md)) |
 | Fault catalogue (14 faults), evidence bundles, layered `diagnose`, blind drill | BUILT + MEASURED ([E9](experiments/E9/): 12/14 first pass, 14/14 after tuning) |
 | ECMP, EVPN-misconfig, MAC-mobility, underlay-protocol and MTU experiments (E2, E4, E7, E5, E3) | BUILT + MEASURED |
-| Clean-room reproduction: fresh clone → green suite with only the README | BUILT + RUN (Mac, [`artifacts/phase9/`](artifacts/phase9/); fresh x86 machine in CI) |
+| Clean-room reproduction: fresh clone → green suite with only the README | BUILT + RUN (brand-new arm64 VM on the Mac, [`artifacts/phase9/cleanroom.md`](artifacts/phase9/cleanroom.md); fresh x86 machine in CI) |
 | SONiC-VS leaf interoperating with FRR spines (BGP, BFD, ECMP) | BUILT + MEASURED (x86 CI; lab suite 41 passed / 1 skipped) |
 | E8: one route through bgpd → zebra → APPL_DB → orchagent → ASIC_DB, frozen orchagent | BUILT + MEASURED ([E8](experiments/E8/analysis.md); vslib, not a real ASIC) |
 | Lossless-QoS auditor (PFC/ECN/DSCP/buffers/watchdog) against a real SONiC CONFIG_DB | BUILT (static analysis) |
@@ -95,4 +95,4 @@ Needs Python ≥ 3.10. The lab's two images take ~400 MB and its 10 containers ~
 | Link failure on the dashboard: annotations, BGP change within one scrape, uplink shift; no visible 1 s throughput dip | [`experiments/telemetry/results/`](experiments/telemetry/results/) |
 | Incast queue delay: tail-drop 111 ms, RED+ECN 2.06 ms, DCTCP 2.67 ms (median, N=5); DCTCP 0 drops, Jain 1.000 | [`experiments/E6/analysis.md`](experiments/E6/analysis.md), [`results_ci/`](experiments/E6/results_ci/) |
 | Classic ECN: 1–3 of 12 connections per run fell back to non-ECN after a dropped SYN | [`experiments/E6/results_ci/B.json`](experiments/E6/results_ci/B.json) |
-| Fresh clone → `make setup` + `make up` + `make test` all green on the Mac; `make resilience` 15/15 | [`artifacts/phase9/`](artifacts/phase9/) |
+| Fresh clone on a brand-new VM → `make vm-setup` + `setup` + `up` + `test` all green; `make resilience` 15/15 | [`artifacts/phase9/cleanroom.md`](artifacts/phase9/cleanroom.md), [`fresh-vm/`](artifacts/phase9/fresh-vm/) |

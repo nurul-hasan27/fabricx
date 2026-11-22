@@ -29,7 +29,7 @@ plan, nothing run), **OUT OF SCOPE**, **NOT DONE** (planned but not built).
 ## Reproducibility: what the Phase 9 clean-room run did and did not cover
 | Covered | Not covered |
 |---|---|
-| Fresh `git clone` on the Mac → `make setup`, `make up`, `make test`, `make resilience` all green (`artifacts/phase9/`) | A **brand-new** arm64 VM: the Mac rerun reused the existing `fabricx-lab` VM (Docker, Containerlab and the FRR image already present; `vm_setup.sh` found everything installed) |
-| The host image was rebuilt by `make setup` | It came from Docker's build cache (same image id as Phase 4); a no-cache rebuild today would pull newer Alpine packages |
+| Fresh `git clone` on a **brand-new** arm64 OrbStack VM (nothing preinstalled, old VM stopped) → `make vm-setup`, `setup`, `up`, `test`, `resilience` all green (`artifacts/phase9/cleanroom.md`, run 3) | The VM had a non-default name (`fabricx-fresh`, passed as `VM=` and `FABRICX_EXEC`) so the old VM could be kept; the literal name `fabricx-lab` was not re-created |
+| The host image was built from scratch on the new VM (no cache) | Alpine packages in it are unpinned, so a later build can get newer versions |
 | Fresh x86 machine on every CI push, running the README's commands (`make vm-setup`/`setup`/`up`/`test`) | Intel Macs and other Linux distributions (only Ubuntu 24.04 tested) |
 | Pinned: FRR 10.2.1, Containerlab 0.83.0, SONiC-VS build 1238524, Python tool versions (`pyproject.toml` `dev` extra) | Runtime Python libraries (pydantic, jinja2, typer, pyyaml) are not pinned; base images are pinned by tag, digests are recorded in `versions.lock.md` |

@@ -7,6 +7,7 @@ import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .runner import PREFIX
 from .validators import ALL, Finding
 
 
@@ -19,7 +20,8 @@ def env_meta() -> dict:
     return {"time_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "host": platform.platform(),
             "frr": "quay.io/frrouting/frr:10.2.1",
-            "containerlab": sh("orb -m fabricx-lab sudo containerlab version 2>/dev/null | grep version")}
+            # same prefix as every other lab command (FABRICX_EXEC), so it asks the VM actually in use
+            "containerlab": sh(f"{PREFIX} containerlab version 2>/dev/null | grep version")}
 
 
 def write(out: Path, findings: list[Finding], state: dict) -> Path:

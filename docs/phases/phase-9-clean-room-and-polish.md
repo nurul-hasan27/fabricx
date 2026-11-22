@@ -30,6 +30,8 @@ all come from the castle's own records.
      on every push. So "fresh clone on a fresh VM → green" is re-checked automatically, not once by hand.
 5. **Clean-room run #2:** committed the fixes locally, cloned that commit into a fresh folder, hid the host image again,
    then ran only the README's commands. Results are below; logs are in `artifacts/phase9/`.
+   **Run #3** went further: a brand-new OrbStack VM with nothing installed, with the old VM switched off so nothing
+   could leak from it. That run found one more bug (mistake 7 below).
 6. **Docs:**
    - README rewritten as the final front page: quick start from nothing, reading order, the honest-scope box, and an
      evidence index where every claim links to its file.
@@ -57,6 +59,10 @@ All from `artifacts/phase9/` (`cleanroom.md` is the step-by-step record).
 | | `make test` | **121 passed, 0 skipped** (78 unit + 43 lab), validate PASS, no drift, 28 requirements, 1 min 58 s |
 | | `make resilience` | **15/15** (14 fault round-trips + new bundle test), 5 min 14 s |
 | | traceability after both | identical to the committed matrix |
+| Clean-room #3 (brand-new arm64 VM, old VM stopped) | `make vm-setup` | ok, 3 min 4 s: Docker, tcpdump, Containerlab installed from nothing |
+| | `make setup` / `make up` | ok, 25.5 s (host image built without cache) / 1 min 5 s (FRR image pulled) |
+| | `make test` | **121 passed**, validate PASS, no drift, 28 requirements, 1 min 57 s |
+| | `make resilience` | **15/15**, 4 min 53 s; traceability identical to the committed matrix |
 | Demo rehearsal | all script steps | F08 → same-subnet ping 100 % loss, routed ping ok, `diagnose` names `rt-mismatch` at layer "EVPN routes", restore → validate PASS, both Grafana annotations posted; every command < 5 s except `diagnose` (~12 s); prep `run-fault F08` 53 s |
 | Resources | 10 lab containers | ~125 MB RAM in total; images FRR 313 MB + host 84 MB (`resources.txt`) |
 
@@ -69,13 +75,14 @@ All from `artifacts/phase9/` (`cleanroom.md` is the step-by-step record).
 | 4 | My first README draft had spine ASN 65100, "Intel Macs" and "4 GB RAM" | written from memory, not from files | checked against `inventory/fabric.yaml` and a measured `resources.txt`; Intel stays "not tested" |
 | 5 | The demo script said `validate` checks the traffic classes and isolation | it doesn't: the lab tests and `diagnose` do | wording fixed after reading `validators.py` |
 | 6 | A fresh install changed 6 tracked files | `src/fabricx.egg-info/` (a pip build by-product) had been committed in the first public commit | removed from git, `*.egg-info/` ignored |
+| 7 | On the brand-new VM, the **stopped** old VM was running again after `make test` | `report.py` hardcoded `orb -m fabricx-lab` to read the Containerlab version, and `orb` starts a stopped VM; the report recorded the wrong machine's version (blank on CI) | uses `FABRICX_EXEC` like every other lab command; the old VM then stayed stopped |
 
 ## Honest status
 | Item | Tier |
 |---|---|
-| Fresh clone → green suite with only the README (Mac) | BUILT + RUN (existing VM reused; host image from Docker's cache) |
+| Fresh clone → green suite with only the README (Mac) | BUILT + RUN (run #2 on the existing VM; run #3 on a brand-new arm64 VM, see below) |
 | Fresh x86 machine on every CI push, README commands | BUILT + RUN (run 44991965377: vm-setup installed Containerlab from nothing; 121 passed, validate PASS, no drift; one run so far) |
-| Brand-new arm64 VM from scratch | NOT DONE (would download ~0.5 GB; needs your OK) |
+| Brand-new arm64 VM from scratch | BUILT + RUN (run #3: test + resilience green, old VM stopped; VM name passed as `VM=fabricx-fresh` instead of re-creating `fabricx-lab`) |
 | Demo video | script and rehearsal done; recording is yours to do |
 
 ## How to explain it in an interview

@@ -29,9 +29,30 @@ modified) removed from git.
 | `fabricx trace` after both | identical to the committed `docs/traceability.md` | `traceability.md` |
 | `git status` afterwards | only `docs/traceability.md` (ordering: trace ran before resilience) and `src/fabricx.egg-info/*` changed → egg-info untracked | — |
 
-## Not covered
+## Not covered by run 2
 A brand-new arm64 VM (the existing VM already had Docker, Containerlab and the FRR image; `vm_setup.sh` found all of
-them and installed nothing). The x86 fresh-machine path is covered by CI on every push.
+them and installed nothing). Covered by run 3 below.
+
+## Run 3 — brand-new arm64 VM (2026-11-22, commit 5e93511 cloned from GitHub into a new folder)
+`orbctl create ubuntu:noble fabricx-fresh` (Ubuntu 24.04.5, kernel 7.2.12-orbstack, created in 45 s; no Docker, no
+Containerlab, no images). The old `fabricx-lab` VM was **stopped** for the whole run, so nothing could come from it.
+Only deviation from the README: the VM name, passed as `VM=fabricx-fresh` and `FABRICX_EXEC="orb -m fabricx-fresh sudo"`.
+
+| Command | Result | Evidence |
+|---|---|---|
+| `make vm-setup` | ok in 3 min 4 s: installed docker.io (29.1.3) + tcpdump, "installing Containerlab 0.83.0 (arm64), found 'none'" | this file |
+| `make setup` | ok in 25.5 s; host image built **without cache** (new id `sha256:1e133d45…`, alpine:3.20 pulled); Docker printed a "legacy builder is deprecated, install buildx" notice, harmless | this file |
+| `make up` | ok in 1 min 5 s incl. pulling FRR 10.2.1 (313 MB); 10 containers running | `fresh-vm/make-up.log` |
+| `make test` | exit 0: ruff + mypy clean, **121 passed**, validate PASS, no drift, 28 requirements, 1 min 57 s | `fresh-vm/make-test.log`, `fresh-vm/junit.xml` |
+| `make resilience` | exit 0: **15 passed**, 4 min 53 s | `fresh-vm/make-resilience.log`, `fresh-vm/junit_resilience.xml` |
+| `fabricx trace` after both | identical to the committed `docs/traceability.md` | — |
+| VM disk afterwards | 4.3 GB used of the VM's root; images FRR 313 MB, host 84 MB, alpine 15 MB | this file |
+
+**Bug found by run 3:** after `make test`, `orbctl list` showed the stopped `fabricx-lab` VM **running again**.
+`src/fabricx/report.py` hardcoded `orb -m fabricx-lab sudo containerlab version` for the report's metadata, so `validate`
+woke up the old VM and recorded *its* Containerlab version (on CI, with no `orb`, the field was empty). Fixed to use
+the same `FABRICX_EXEC` prefix as every other lab command; re-ran `validate` with `fabricx-lab` stopped → PASS, version
+read from `fabricx-fresh`, old VM stayed stopped (also through the whole resilience run).
 
 ## x86 fresh machine (GitHub Actions run 44991965377, commit 78f6469)
 `make vm-setup RUN=sudo` → "installing Containerlab 0.83.0 (amd64), found 'none'", ready on x86_64 kernel

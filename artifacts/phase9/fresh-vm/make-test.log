@@ -1,0 +1,16 @@
+.venv/bin/ruff check .
+All checks passed!
+.venv/bin/mypy
+Success: no issues found in 23 source files
+.venv/bin/pytest tests -q -m "not resilience" --timeout=400 --junitxml=artifacts/junit.xml
+........................................................................ [ 59%]
+.................................................                        [100%]
+121 passed, 15 deselected in 105.30s (0:01:45)
+.venv/bin/fabricx validate
+report: artifacts/validate/2026-11-22T09-27-43Z/report.md
+PASS
+.venv/bin/fabricx drift
+no drift
+.venv/bin/fabricx trace
+28 requirements -> docs/traceability.md
+make test VM=fabricx-fresh  8.07s user 5.26s system 11% cpu 1:56.55 total
