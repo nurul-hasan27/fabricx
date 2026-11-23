@@ -33,7 +33,7 @@ lab-test:
 
 # ---- Phase 4: one command ----
 up: fabric-up
-	@echo "waiting for the fabric to converge..."; sleep 40
+	@echo "waiting for the fabric to converge (validate must PASS)..."; .venv/bin/fabricx wait
 down: fabric-down
 # `make test` = lint + types + unit + live lab tests (JUnit XML) + validation report + drift check + traceability matrix.
 # Non-zero exit on ANY failure.

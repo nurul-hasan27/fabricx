@@ -6,9 +6,9 @@ In that rehearsal each command took under 5 s except `diagnose` (~12 s, because 
 
 ## Before you start (not on camera, ~3 min)
 ```bash
-make up                      # fabric up and converged
+make up                      # fabric up; ends with "fabric healthy after N s" (exits 1 and names the problem if not)
 scripts/monitoring.sh up     # Prometheus :9090 + Grafana :3000 in the lab VM
-.venv/bin/fabricx exporter & # metrics for Prometheus on :9101
+nohup .venv/bin/fabricx exporter > /tmp/fabricx-exporter.log 2>&1 &   # metrics on :9101; output to a file, or the shell may freeze it ("suspended (tty output)") and Grafana shows "No data"
 export FABRICX_GRAFANA_URL=http://fabricx-lab.orb.local:3000   # so inject/restore pin notes on the dashboard
 .venv/bin/fabricx run-fault F08   # ~1 min: leaves a complete evidence bundle in artifacts/runs/ to open at 3:45
 ```
@@ -48,4 +48,13 @@ Use a terminal with a large font.
 - Run the "before you start" block, then `fabricx validate` once off camera, so caches are warm.
 - If a step hangs on camera, cut to the stored file that shows the same thing (bundle, `timeline.svg`). Never re-run a
   fault on camera to "get a nicer number".
-- Afterwards: `.venv/bin/fabricx restore` (if a fault is still active), `scripts/monitoring.sh down`, `make down`.
+- Afterwards: `.venv/bin/fabricx restore` (if a fault is still active), `pkill -f "fabricx exporter"`,
+  `scripts/monitoring.sh down`, `make down`.
+
+## If something looks wrong before you start
+| You see | Meaning | Do |
+|---|---|---|
+| `make up` ends with "fabric NOT healthy" and "restarted during deploy" | a container restarted while Containerlab was wiring it, so it lost its links | `make down && make up` |
+| `[1] + suspended (tty output)` after starting the exporter | the shell froze the background job because it printed to the terminal | `kill %1`, then start it again with the `nohup ... > /tmp/fabricx-exporter.log 2>&1 &` line |
+| Grafana says "No data" / "Data does not have a time field" | Prometheus has nothing from the exporter | check <http://fabricx-lab.orb.local:9090/targets> shows `fabricx` **up**; if not, see the line above |
+| `run-fault` says "fabric did not return to healthy" | the fabric was already broken before the fault | `.venv/bin/fabricx validate` to see what, then `make down && make up` |

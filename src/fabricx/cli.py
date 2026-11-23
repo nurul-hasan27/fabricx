@@ -45,6 +45,28 @@ def validate(inventory: Path = INV, out: Path = Path("artifacts/validate")) -> N
     raise typer.Exit(code=1 if findings else 0)
 
 
+@app.command("wait")
+def wait_cmd(timeout: int = 240, inventory: Path = INV) -> None:
+    """Wait until the live fabric validates clean (used by `make up`). Exit 1 with the findings if it never does."""
+    from .faults.runner import wait_healthy
+    f = model.load(inventory)
+    try:
+        typer.echo(f"fabric healthy after {wait_healthy(f, timeout):.0f} s")
+        return
+    except RuntimeError:
+        pass
+    for x in validators.validate(f, collectors.Collector(f).snapshot())[:10]:
+        typer.echo(f"FAIL {x.check} {x.node}: {x.message}")
+    # A container that restarted during deploy has lost the links Containerlab plugged into it.
+    names = [f"clab-{f.name}-{n}" for n in [s.name for s in f.spines + f.leaves] + [h.name for h in f.hosts]]
+    r = runner.sh("docker inspect -f '{{.Name}} {{.RestartCount}}' " + " ".join(names))
+    restarted = [ln.strip("/ ") for ln in r.stdout.splitlines() if ln.split() and ln.split()[-1] != "0"]
+    if restarted:
+        typer.echo("restarted during deploy (their links are gone): " + ", ".join(restarted))
+    typer.echo(f"fabric NOT healthy after {timeout} s; fix: make down && make up")
+    raise typer.Exit(code=1)
+
+
 @app.command()
 def deploy(inventory: Path = INV, out: Path = Path("generated")) -> None:
     """Generate, then deploy the lab with Containerlab."""

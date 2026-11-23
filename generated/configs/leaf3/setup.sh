@@ -3,26 +3,29 @@
 # Runs BEFORE FRR starts (see the clab `cmd`): if FRR boots first, it can bind the L3VNI to an
 # automatically created BGP instance and never originate Type-5 routes (seen on CI).
 set -e
+# r = retry a step for up to 5 s. Once (leaf1, Mac, 2026-11-23) a device created one line earlier was "not found";
+# the script exited, Docker restarted the container, and the restart wiped the links Containerlab had just plugged in.
+r() { n=0; until "$@"; do n=$((n+1)); [ "$n" -ge 25 ] && return 1; sleep 0.2; done; }
 sysctl -qw net.ipv4.ip_forward=1
 sysctl -qw net.ipv4.fib_multipath_hash_policy=1
 sysctl -qw net.ipv4.conf.all.rp_filter=0 net.ipv4.conf.default.rp_filter=0
 
 # --- VRF BLUE: routing table + L3VNI 50002 (used for routed traffic between leaves)
 ip link add BLUE type vrf table 1001
-ip link set BLUE up
+r ip link set BLUE up
 ip link add br50002 type bridge
 ip link add vx50002 type vxlan id 50002 dstport 4789 local 10.0.0.13 df set nolearning
-ip link set vx50002 mtu 1500 master br50002
-ip link set br50002 master BLUE
-ip link set br50002 up
-ip link set vx50002 up
+r ip link set vx50002 mtu 1500 master br50002
+r ip link set br50002 master BLUE
+r ip link set br50002 up
+r ip link set vx50002 up
 
 # --- VLAN 30: L2VNI 10030, anycast gateway 10.30.30.1, in VRF BLUE
 ip link add br30 type bridge
 ip link add vx10030 type vxlan id 10030 dstport 4789 local 10.0.0.13 df set nolearning
-ip link set vx10030 mtu 1500 master br30
-ip link set br30 address 02:fa:b0:00:00:01
-ip link set br30 master BLUE
-ip addr add 10.30.30.1/24 dev br30
-ip link set br30 up
-ip link set vx10030 up
+r ip link set vx10030 mtu 1500 master br30
+r ip link set br30 address 02:fa:b0:00:00:01
+r ip link set br30 master BLUE
+r ip addr add 10.30.30.1/24 dev br30
+r ip link set br30 up
+r ip link set vx10030 up

@@ -3,6 +3,9 @@
 # Runs BEFORE FRR starts (see the clab `cmd`): if FRR boots first, it can bind the L3VNI to an
 # automatically created BGP instance and never originate Type-5 routes (seen on CI).
 set -e
+# r = retry a step for up to 5 s. Once (leaf1, Mac, 2026-11-23) a device created one line earlier was "not found";
+# the script exited, Docker restarted the container, and the restart wiped the links Containerlab had just plugged in.
+r() { n=0; until "$@"; do n=$((n+1)); [ "$n" -ge 25 ] && return 1; sleep 0.2; done; }
 sysctl -qw net.ipv4.ip_forward=1
 sysctl -qw net.ipv4.fib_multipath_hash_policy={{ f.ecmp_hash_policy }}
 sysctl -qw net.ipv4.conf.all.rp_filter=0 net.ipv4.conf.default.rp_filter=0
@@ -10,23 +13,23 @@ sysctl -qw net.ipv4.conf.all.rp_filter=0 net.ipv4.conf.default.rp_filter=0
 
 # --- VRF {{ vrf.name }}: routing table + L3VNI {{ vrf.l3vni }} (used for routed traffic between leaves)
 ip link add {{ vrf.name }} type vrf table {{ 1000 + loop.index }}
-ip link set {{ vrf.name }} up
+r ip link set {{ vrf.name }} up
 ip link add br{{ vrf.l3vni }} type bridge
 ip link add vx{{ vrf.l3vni }} type vxlan id {{ vrf.l3vni }} dstport 4789 local {{ sw.loopback }} df {{ f.vxlan_df }} nolearning
-ip link set vx{{ vrf.l3vni }} mtu {{ f.host_mtu }} master br{{ vrf.l3vni }}
-ip link set br{{ vrf.l3vni }} master {{ vrf.name }}
-ip link set br{{ vrf.l3vni }} up
-ip link set vx{{ vrf.l3vni }} up
+r ip link set vx{{ vrf.l3vni }} mtu {{ f.host_mtu }} master br{{ vrf.l3vni }}
+r ip link set br{{ vrf.l3vni }} master {{ vrf.name }}
+r ip link set br{{ vrf.l3vni }} up
+r ip link set vx{{ vrf.l3vni }} up
 {% endfor %}
 {% for v in vlans %}
 
 # --- VLAN {{ v.id }}: L2VNI {{ v.vni }}, anycast gateway {{ v.gateway }}, in VRF {{ v.vrf }}
 ip link add br{{ v.id }} type bridge
 ip link add vx{{ v.vni }} type vxlan id {{ v.vni }} dstport 4789 local {{ sw.loopback }} df {{ f.vxlan_df }} nolearning
-ip link set vx{{ v.vni }} mtu {{ f.host_mtu }} master br{{ v.id }}
-ip link set br{{ v.id }} address {{ f.anycast_gw_mac }}
-ip link set br{{ v.id }} master {{ v.vrf }}
-ip addr add {{ v.gateway }}/{{ v.subnet.prefixlen }} dev br{{ v.id }}
-ip link set br{{ v.id }} up
-ip link set vx{{ v.vni }} up
+r ip link set vx{{ v.vni }} mtu {{ f.host_mtu }} master br{{ v.id }}
+r ip link set br{{ v.id }} address {{ f.anycast_gw_mac }}
+r ip link set br{{ v.id }} master {{ v.vrf }}
+r ip addr add {{ v.gateway }}/{{ v.subnet.prefixlen }} dev br{{ v.id }}
+r ip link set br{{ v.id }} up
+r ip link set vx{{ v.vni }} up
 {% endfor %}
